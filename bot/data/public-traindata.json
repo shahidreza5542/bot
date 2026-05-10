@@ -1,0 +1,25 @@
+{
+  "contribution": {
+    "title": "Toolmetry AI Training Data - Public Contribution",
+    "description": "Add your patterns and responses here! This file is for community contributions.",
+    "instructions": [
+      "Add new categories to the knowledgeBase object",
+      "Each category needs 'patterns' (array of keywords) and 'responses' (en/hi)",
+      "Keep responses under 250 characters",
+      "Use emojis for better UX",
+      "Be friendly and professional"
+    ]
+  },
+  "knowledgeBase": {
+    "example": {
+      "patterns": ["example", "sample", "demo"],
+      "responses": {
+        "en": "This is an example response. Replace it with your own!",
+        "hi": "Ye ek example response hai. Isse apne se replace karein!"
+      }
+    }
+  },
+  "languageAdditions": {
+    "hindiWords": ["suno", "dekho", "sunai", "lag raha", "mujhe laga"]
+  }
+}

@@ -3,16 +3,47 @@ const axios = require('axios');
 const path = require('path');
 const { tickets } = require('../commands/ticket');
 
-// Load training data from JSON file
+// Load training data from JSON files (internal + public)
 const trainData = require('../data/traindata.json');
-const knowledgeBase = trainData.knowledgeBase;
-const hindiWords = trainData.languageDetection.hindiWords;
+let publicTrainData = {};
+try {
+  publicTrainData = require('../data/public-traindata.json');
+} catch (e) {
+  console.log('No public training data found, using only internal data');
+}
+
+// Merge knowledge bases (public overrides internal)
+const knowledgeBase = {
+  ...trainData.knowledgeBase,
+  ...publicTrainData.knowledgeBase
+};
+
+// Merge Hindi words
+const hindiWords = [
+  ...trainData.languageDetection.hindiWords,
+  ...(publicTrainData.languageAdditions?.hindiWords || [])
+];
+
 const fallbackResponses = trainData.fallbackResponses;
 
 // Track user activity
 const userActivity = new Map();
 const lastRoasted = new Map();
-const aiResponseCooldown = new Map(); // Track AI response cooldowns
+const aiResponseCooldown = new Map(); // Track AI response cooldowns per channel
+const userMessageTracker = new Map(); // Track user messages for spam prevention
+const unknownQueryTracker = new Map(); // Track unknown queries to tag staff only once
+const processedMessages = new Set(); // Track processed message IDs to prevent duplicates
+
+// Spam prevention config
+const SPAM_CONFIG = trainData.spamPrevention || {
+  cooldownSeconds: 20,
+  maxMessagesPerMinute: 3
+};
+
+// Clean up old processed messages every 5 minutes
+setInterval(() => {
+  processedMessages.clear();
+}, 5 * 60 * 1000);
 
 // Detect language (simple heuristic)
 function detectLanguage(message) {
@@ -21,13 +52,26 @@ function detectLanguage(message) {
   return hasHindi ? 'hi' : 'en';
 }
 
-// Match query to knowledge base
+// Match query to knowledge base (flexible matching)
 function matchQuery(message) {
   const msg = message.toLowerCase();
+  const words = msg.split(/\s+/);
   
   for (const [key, data] of Object.entries(knowledgeBase)) {
     for (const pattern of data.patterns) {
-      if (msg.includes(pattern.toLowerCase())) {
+      const patternLower = pattern.toLowerCase();
+      
+      // Direct match
+      if (msg.includes(patternLower)) {
+        return key;
+      }
+      
+      // Word-by-word matching (handles "my password no reset" -> "password reset")
+      const patternWords = patternLower.split(/\s+/);
+      const matchedWords = patternWords.filter(pw => words.some(w => w.includes(pw) || pw.includes(w)));
+      
+      // If at least 60% of pattern words match, consider it a match
+      if (matchedWords.length >= Math.ceil(patternWords.length * 0.6)) {
         return key;
       }
     }
@@ -116,6 +160,37 @@ async function generateSupportResponse(userMessage, channelType = 'support') {
   return fallbackResponses[lang] || fallbackResponses.en;
 }
 
+// Check if user is spamming
+function isUserSpamming(userId, channelId) {
+  const now = Date.now();
+  const key = `${userId}-${channelId}`;
+  const userData = userMessageTracker.get(key) || { count: 0, firstMessage: now };
+  
+  // Reset if 1 minute has passed
+  if (now - userData.firstMessage > 60000) {
+    userData.count = 0;
+    userData.firstMessage = now;
+  }
+  
+  userData.count++;
+  userMessageTracker.set(key, userData);
+  
+  return userData.count > SPAM_CONFIG.maxMessagesPerMinute;
+}
+
+// Check if query is known
+function isKnownQuery(message) {
+  const msg = message.toLowerCase();
+  for (const [key, data] of Object.entries(knowledgeBase)) {
+    for (const pattern of data.patterns) {
+      if (msg.includes(pattern.toLowerCase())) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 module.exports = {
   name: 'messageCreate',
   async execute(message) {
@@ -134,13 +209,25 @@ module.exports = {
     const isAISupportChannel = channelName === 'ai-support' || channelName.includes('ai-support');
     
     if (isTicketChannel || isAISupportChannel) {
-      // Get cooldown key
-      const cooldownKey = isTicketChannel ? `ticket-${message.channel.id}` : `ai-support-${message.channel.id}`;
+      // Check if we already processed this message (prevent duplicates)
+      if (processedMessages.has(message.id)) {
+        return;
+      }
+      processedMessages.add(message.id);
+      
+      // Check if user is spamming
+      if (isUserSpamming(userId, message.channel.id)) {
+        console.log(`Spam detected from user ${userId} in ${channelName}`);
+        return; // Don't respond to spam
+      }
+      
+      // Get cooldown key for channel
+      const cooldownKey = `channel-${message.channel.id}`;
       const lastResponse = aiResponseCooldown.get(cooldownKey) || 0;
       const timeSinceResponse = now - lastResponse;
 
-      // Only respond if it's been at least 15 seconds since last AI response (avoid spam)
-      if (timeSinceResponse > 15000) {
+      // Only respond if it's been at least 20 seconds since last AI response (avoid spam)
+      if (timeSinceResponse > (SPAM_CONFIG.cooldownSeconds * 1000)) {
         let context = 'general support';
         
         // If it's a ticket channel, get ticket info
@@ -153,16 +240,37 @@ module.exports = {
           }
         }
 
+        const isKnown = isKnownQuery(message.content);
         const aiResponse = await generateSupportResponse(message.content, context);
+        
+        // Check if this is an unknown query
+        const unknownKey = `unknown-${message.channel.id}`;
+        const lastUnknownTag = unknownQueryTracker.get(unknownKey) || 0;
+        const shouldTagStaff = trainData.unknownQueryTagStaff && !isKnown && (now - lastUnknownTag > 300000); // 5 min cooldown
 
-        const embed = new EmbedBuilder()
-          .setTitle('🤖 Toolmetry AI Support')
-          .setDescription(aiResponse)
-          .setColor(0x00D4AA)
-          .setFooter({ text: 'Powered by AI • Toolmetry Support' })
-          .setTimestamp();
+        if (shouldTagStaff) {
+          // Tag staff for unknown query
+          const embed = new EmbedBuilder()
+            .setTitle('🤖 Toolmetry AI Support')
+            .setDescription(aiResponse)
+            .setColor(0xFFA500) // Orange for unknown queries
+            .setFooter({ text: 'AI Assistant • Staff has been notified' })
+            .setTimestamp();
 
-        await message.channel.send({ embeds: [embed] });
+          await message.channel.send({ content: '@here', embeds: [embed] });
+          unknownQueryTracker.set(unknownKey, now);
+        } else {
+          // Normal response without tagging
+          const embed = new EmbedBuilder()
+            .setTitle('🤖 Toolmetry AI Support')
+            .setDescription(aiResponse)
+            .setColor(isKnown ? 0x00D4AA : 0xFFA500) // Green for known, Orange for unknown
+            .setFooter({ text: isKnown ? 'Powered by AI • Toolmetry Support' : 'AI Assistant • Contact staff if needed' })
+            .setTimestamp();
+
+          await message.channel.send({ embeds: [embed] });
+        }
+        
         aiResponseCooldown.set(cooldownKey, now);
       }
     }

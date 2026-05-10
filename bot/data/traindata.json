@@ -1,95 +1,150 @@
 {
   "knowledgeBase": {
     "greetings": {
-      "patterns": ["hi", "hello", "hey", "koi hai", "namaste", "hola"],
+      "patterns": ["hi", "hello", "hey", "koi hai", "namaste", "hola", "yo", "sup", "wassup"],
       "responses": {
-        "en": "Hello! Welcome to Toolmetry support. How can I assist you today?",
-        "hi": "Namaste! Toolmetry support mein aapka swagat hai. Main aapki kaise madad kar sakta hu?"
+        "en": "Hello! Welcome to Toolmetry support. How can I assist you today? 😊",
+        "hi": "Namaste! Toolmetry support mein aapka swagat hai. Main aapki kaise madad kar sakta hu? 🙏"
       }
     },
     "whatIsToolmetry": {
-      "patterns": ["what is toolmetry", "toolmetry kya hai", "ye website kis liye hai", "what does toolmetry do"],
+      "patterns": ["what is toolmetry", "toolmetry kya hai", "ye website kis liye hai", "what does toolmetry do", "about toolmetry", "toolmetry ke baare mein"],
       "responses": {
-        "en": "Toolmetry is your go-to platform for useful online tools designed to make your daily tasks easier. From utilities to productivity tools, we've got you covered!",
-        "hi": "Toolmetry ek aisi jagah hai jahan aapko aapke kaam aane wale behtareen tools milte hain. Ye aapke daily tasks ko aasan banane ke liye design kiya gaya hai."
+        "en": "🛠️ Toolmetry is your all-in-one platform for useful online tools! From text converters to calculators, image tools to generators - we make your daily tasks easier. All tools are free and easy to use!",
+        "hi": "🛠️ Toolmetry aapke liye useful online tools ka ek complete platform hai! Text converters se lekar calculators, image tools se generators tak - hum aapke daily tasks aasan banate hain. Sab tools free aur easy to use hain!"
+      }
+    },
+    "availableTools": {
+      "patterns": ["what tools", "kaunse tools", "tools list", "available tools", "kitne tools", "features", "services"],
+      "responses": {
+        "en": "📋 We offer: Text Tools (case converter, word counter), Calculators (scientific, BMI), Image Tools (compressor, converter), Generators (QR code, password), Developer Tools (JSON formatter, regex tester), and many more!",
+        "hi": "📋 Hum offer karte hain: Text Tools (case converter, word counter), Calculators (scientific, BMI), Image Tools (compressor, converter), Generators (QR code, password), Developer Tools (JSON formatter, regex tester), aur bhi bahut kuch!"
       }
     },
     "passwordReset": {
-      "patterns": ["password reset", "forgot password", "password bhool gaya", "reset password"],
+      "patterns": ["password reset", "forgot password", "password bhool gaya", "reset password", "password change", "login nahi ho raha", "my password", "password not working", "can't login", "password issue", "new password", "change password", "mera password", "password kaise badle", "login issue", "signin problem", "password yaad nahi", "pass reset", "forgot pass"],
       "responses": {
-        "en": "To reset your password, click on 'Forgot Password' on the login page. You'll receive a reset link on your registered email.",
-        "hi": "Password reset karne ke liye login page par 'Forgot Password' par click karein. Aapko registered email par ek reset link mil jayega."
+        "en": "🔐 To reset your password:\n1. Go to Login page\n2. Click 'Forgot Password'\n3. Enter your registered email\n4. Check your inbox for reset link\n5. Create new password and login!",
+        "hi": "🔐 Password reset karne ke liye:\n1. Login page par jayein\n2. 'Forgot Password' par click karein\n3. Apna registered email daalein\n4. Inbox check karein reset link ke liye\n5. Naya password banayein aur login karein!"
       }
     },
     "newAccount": {
-      "patterns": ["new account", "sign up", "register", "naya account", "account kaise banaye"],
+      "patterns": ["new account", "sign up", "register", "naya account", "account kaise banaye", "signup"],
       "responses": {
-        "en": "Click the 'Sign Up' button in the top right corner of the website and register using your email ID.",
-        "hi": "Aap website ke top right corner mein 'Sign Up' button par click karke apni email ID se naya account bana sakte hain."
+        "en": "📝 Creating account is easy:\n1. Visit toolmetry.com\n2. Click 'Sign Up' (top right)\n3. Enter your email & create password\n4. Verify your email\n5. Start using tools!",
+        "hi": "📝 Account banana bahut aasan hai:\n1. toolmetry.com par jayein\n2. 'Sign Up' par click karein (top right)\n3. Apna email aur password daalein\n4. Email verify karein\n5. Tools use karna shuru karein!"
+      }
+    },
+    "loginIssue": {
+      "patterns": ["login", "sign in", "login nahi ho raha", "signin", "login problem", "can't login"],
+      "responses": {
+        "en": "🔑 Login issues? Try these:\n1. Check email/password spelling\n2. Clear browser cache\n3. Try incognito/private mode\n4. Reset password if forgotten\n5. Disable browser extensions",
+        "hi": "🔑 Login mein problem? Ye try karein:\n1. Email/password spelling check karein\n2. Browser cache clear karein\n3. Incognito/private mode try karein\n4. Password reset karein agar bhool gaye\n5. Browser extensions disable karein"
       }
     },
     "howToUseTools": {
-      "patterns": ["how to use", "tool use", "kaise use karein", "tools ko kaise use karein"],
+      "patterns": ["how to use", "tool use", "kaise use karein", "tools ko kaise use karein", "tool work", "steps"],
       "responses": {
-        "en": "Each tool has a guide on its page. Simply input your details and the tool will give you results instantly!",
-        "hi": "Har tool ke page par ek chhota sa guide ya description diya gaya hai ki use kaise istemaal karna hai. Bas apni details input karein aur tool aapko result de dega."
+        "en": "🎯 How to use any tool:\n1. Select the tool from menu\n2. Read the description/guide\n3. Input your data/text\n4. Click the action button\n5. Get instant results!\nMost tools have examples too!",
+        "hi": "🎯 Koi bhi tool kaise use karein:\n1. Menu se tool select karein\n2. Description/guide padhein\n3. Apna data/text daalein\n4. Action button click karein\n5. Instant results paayein!\nMost tools mein examples bhi hain!"
       }
     },
     "mobileSupport": {
-      "patterns": ["mobile", "phone", "android", "ios", "mobile par chalegi"],
+      "patterns": ["mobile", "phone", "android", "ios", "mobile par chalegi", "app", "application"],
       "responses": {
-        "en": "Yes! Toolmetry is fully mobile-responsive. You can use it on your phone's browser without any issues.",
-        "hi": "Haan, Toolmetry poori tarah se mobile-responsive hai. Aap ise apne phone ke browser par aaram se use kar sakte hain."
+        "en": "📱 Yes! Toolmetry works perfectly on mobile:\n✅ No app needed - use browser\n✅ Fully responsive design\n✅ Works on Android & iOS\n✅ Fast loading even on slow networks\nJust visit toolmetry.com on your phone!",
+        "hi": "📱 Haan! Toolmetry mobile par perfectly kaam karta hai:\n✅ Koi app nahi chahiye - browser use karein\n✅ Fully responsive design\n✅ Android & iOS dono par\n✅ Slow network par bhi fast\nBus phone par toolmetry.com visit karein!"
       }
     },
     "toolError": {
-      "patterns": ["error", "not working", "problem", "issue", "error aa raha hai"],
+      "patterns": ["error", "not working", "problem", "issue", "error aa raha hai", "bug", "glitch", "broken"],
       "responses": {
-        "en": "Please refresh the page and try again. If the problem persists, please let us know which tool you were using so we can assist better.",
-        "hi": "Kripya page ko refresh karein aur dobara try karein. Agar problem phir bhi aaye, toh humein detail mein batayein ki aap kaunsa tool use kar rahe the."
+        "en": "⚠️ Quick fixes to try:\n1. 🔄 Refresh the page (F5)\n2. 🧹 Clear browser cache\n3. 🌐 Check internet connection\n4. 🔄 Try a different browser\n5. 📋 Check if input format is correct\nIf still not working, tell us which tool and we'll fix it ASAP!",
+        "hi": "⚠️ Quick fixes try karein:\n1. 🔄 Page refresh karein (F5)\n2. 🧹 Browser cache clear karein\n3. 🌐 Internet connection check karein\n4. 🔄 Dusra browser try karein\n5. 📋 Input format sahi hai ki nahi check karein\nAgar abhi bhi nahi chal raha, batayein kaunsa tool aur hum fix kar denge!"
+      }
+    },
+    "slowLoading": {
+      "patterns": ["slow", "loading", "time lag raha", "speed", "fast", "optimize"],
+      "responses": {
+        "en": "⏱️ Slow loading? Try:\n1. Check your internet speed\n2. Close unused browser tabs\n3. Disable VPN temporarily\n4. Try during off-peak hours\n5. Use lite mode if available",
+        "hi": "⏱️ Loading slow hai? Ye try karein:\n1. Internet speed check karein\n2. Unused browser tabs band karein\n3. VPN temporarily disable karein\n4. Off-peak hours mein try karein\n5. Lite mode use karein agar available ho"
       }
     },
     "pricing": {
-      "patterns": ["free", "price", "cost", "pricing", "kitne paise", "free hai"],
+      "patterns": ["free", "price", "cost", "pricing", "kitne paise", "free hai", "payment", "subscription", "premium"],
       "responses": {
-        "en": "Yes, most tools on Toolmetry are free to use. If there's any premium feature, it will be clearly mentioned on the tool page.",
-        "hi": "Haan, Toolmetry par uplabdh tools aam taur par free hain. Agar koi premium feature hoga toh wahan mention kiya jayega."
+        "en": "💰 Great news! Toolmetry is 100% FREE:\n✅ All tools - No cost\n✅ No signup required for most tools\n✅ No hidden charges\n✅ No credit card needed\n✅ Unlimited usage\nWe believe in making useful tools accessible to everyone!",
+        "hi": "💰 Great news! Toolmetry 100% FREE hai:\n✅ All tools - Koi cost nahi\n✅ Most tools ke liye signup nahi chahiye\n✅ Koi hidden charges nahi\n✅ Credit card nahi chahiye\n✅ Unlimited usage\nHum useful tools sabke liye accessible banana chahte hain!"
       }
     },
     "apiAccess": {
-      "patterns": ["api", "developer", "integration", "programmatic access"],
+      "patterns": ["api", "developer", "integration", "programmatic access", "code", "api key"],
       "responses": {
-        "en": "Currently, our tools are designed for direct website use. For API access details, please check our documentation or contact support.",
-        "hi": "Abhi ke liye hamare tools directly website ke through use kiye ja sakte hain. API access ki details ke liye aap documentation check kar sakte hain."
+        "en": "👨‍💻 Developer? Currently, tools are web-based only. For API access:\n• Contact us with your use case\n• We're building API endpoints\n• Priority access for beta testers\nEmail: support@toolmetry.com with 'API Request' in subject!",
+        "hi": "👨‍💻 Developer? Abhi tools web-based hain. API access ke liye:\n• Apna use case batakar contact karein\n• Hum API endpoints bana rahe hain\n• Beta testers ko priority access\nEmail: support@toolmetry.com subject mein 'API Request' likhein!"
+      }
+    },
+    "download": {
+      "patterns": ["download", "save", "export", "file", "result download", "save karein"],
+      "responses": {
+        "en": "💾 Most tools offer download:\n✅ Look for 'Download' button\n✅ Right-click > Save image (for images)\n✅ Copy & paste results\n✅ Some tools auto-download\nNeed help with a specific tool? Let us know!",
+        "hi": "💾 Most tools mein download option hai:\n✅ 'Download' button dhoondhein\n✅ Right-click > Save image (images ke liye)\n✅ Copy & paste kar sakte hain\n✅ Kuch tools auto-download karte hain\nKisi specific tool mein help chahiye? Batayein!"
+      }
+    },
+    "privacy": {
+      "patterns": ["privacy", "secure", "data", "safe", "information", "storage", "trust"],
+      "responses": {
+        "en": "🔒 Your privacy is our priority:\n✅ No data stored on our servers\n✅ Processing happens in your browser\n✅ No tracking or analytics\n✅ No ads or third-party scripts\n✅ HTTPS encrypted connection\nYour data is safe with us!",
+        "hi": "🔒 Aapki privacy hamari priority hai:\n✅ Koi data hamare servers par store nahi hota\n✅ Processing aapke browser mein hoti hai\n✅ Koi tracking ya analytics nahi\n✅ Koi ads ya third-party scripts nahi\n✅ HTTPS encrypted connection\nAapka data humare saath safe hai!"
+      }
+    },
+    "contact": {
+      "patterns": ["contact", "email", "reach", "message", "feedback", "suggestion", "report"],
+      "responses": {
+        "en": "📧 Reach us at:\n• Email: support@toolmetry.com\n• Discord: Join our server\n• Twitter: @ToolmetryAI\nWe typically respond within 24 hours!",
+        "hi": "📧 Humse contact karein:\n• Email: support@toolmetry.com\n• Discord: Hamara server join karein\n• Twitter: @ToolmetryAI\nHum typically 24 hours mein respond karte hain!"
+      }
+    },
+    "websiteLink": {
+      "patterns": ["website", "link", "url", "toolmetry.com", "site", "address", "open"],
+      "responses": {
+        "en": "🌐 Visit us at: https://toolmetry.com\nBookmark it for quick access!",
+        "hi": "🌐 Hum visit karein: https://toolmetry.com\nQuick access ke liye bookmark karein!"
       }
     },
     "humanSupport": {
-      "patterns": ["human", "talk to agent", "customer care", "insaan se baat", "support se baat"],
+      "patterns": ["human", "talk to agent", "customer care", "insaan se baat", "support se baat", "staff", "team"],
       "responses": {
-        "en": "I'm transferring your query to our human support team. They will contact you via email or chat shortly.",
-        "hi": "Main abhi aapki query hamari human support team ko transfer kar raha hu. Wo jald hi aapse email ya chat ke zariye contact karenge."
+        "en": "👨‍💼 Need human help? I'm tagging our support team! @here\n\nPlease wait while our team reviews your query. For urgent issues, email support@toolmetry.com",
+        "hi": "👨‍💼 Insaan ki madad chahiye? Main support team ko tag kar raha hu! @here\n\nKripya wait karein jab tak hamari team aapki query review karti hai. Urgent issues ke liye email karein: support@toolmetry.com"
       }
     },
     "thanks": {
-      "patterns": ["thank", "shukriya", "dhanyawad", "thanks"],
+      "patterns": ["thank", "shukriya", "dhanyawad", "thanks", "thankyou", "ty", "tysm"],
       "responses": {
-        "en": "You're welcome! Is there anything else I can help you with?",
-        "hi": "Aapka swagat hai! Kya main aapki aur koi madad kar sakta hu?"
+        "en": "😊 You're very welcome! Happy to help anytime. Need anything else? Just ask!",
+        "hi": "😊 Aapka bahut bahut swagat hai! Madad karke acha laga. Kuch aur chahiye? Bas poochiye!"
       }
     },
     "goodbye": {
-      "patterns": ["bye", "goodbye", "alvida", "take care"],
+      "patterns": ["bye", "goodbye", "alvida", "take care", "see you", "cya", "ttyl"],
       "responses": {
-        "en": "Goodbye! Have a great day. Feel free to reach out anytime you need help!",
-        "hi": "Alvida! Aapka din shubh ho. Jab bhi aapko madad chahiye, zaroor sampark karein!"
+        "en": "👋 Goodbye! Have an awesome day! Remember, we're always here when you need help. See you soon!",
+        "hi": "👋 Alvida! Aapka din shubh ho! Yaad rakhein, jab bhi madad chahiye hum yahan hain. Phir milenge!"
       }
     }
   },
   "languageDetection": {
-    "hindiWords": ["hai", "kya", "kaise", "karo", "kar", "karein", "hain", "hoga", "batao", "bataiye", "madad", "swagat", "dhanyawad", "shukriya", "nahi", "batao", "mujhe", "chahiye", "kaam", "kaise", "kaunsa", "kab", "kahan"]
+    "hindiWords": ["hai", "kya", "kaise", "karo", "kar", "karein", "hain", "hoga", "batao", "bataiye", "madad", "swagat", "dhanyawad", "shukriya", "nahi", "batao", "mujhe", "chahiye", "kaam", "kaunsa", "kab", "kahan", "aur", "yeh", "woh", "aap", "tum", "mera", "tera", "hamara", "kitna", "itna", "utna", "accha", "bura", "naya", "purana", "chota", "bada", "jaldi", "dheere", "aaj", "kal", "parso", "din", "raat", "subah", "shaam"]
   },
   "fallbackResponses": {
-    "en": "I'm here to help! Could you provide more details about your issue?",
-    "hi": "Main aapki madad ke liye yahan hu! Kripya apni samasya ke baare mein aur bataein?"
+    "en": "I'm not sure about that specific query. Let me tag our support team to help you! @here\n\nMeanwhile, you can check our Help Center or email support@toolmetry.com",
+    "hi": "Is specific query ke baare mein mujhe sure nahi hai. Main support team ko tag kar raha hu aapki madad ke liye! @here\n\nTab tak aap Help Center check kar sakte hain ya email karein: support@toolmetry.com"
+  },
+  "unknownQueryTagStaff": true,
+  "spamPrevention": {
+    "cooldownSeconds": 20,
+    "maxMessagesPerMinute": 3,
+    "ignoreIfStaffTagged": true
   }
 }
