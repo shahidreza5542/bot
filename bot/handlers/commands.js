@@ -31,13 +31,34 @@ module.exports = async (client) => {
 
   try {
     console.log('Started refreshing application (/) commands.');
+    console.log(`Total commands: ${commands.length}`);
 
-    await rest.put(
-      Routes.applicationCommands(process.env.DISCORD_CLIENT_ID),
-      { body: commands }
-    );
+    // Register commands globally (can take up to 1 hour to propagate)
+    if (process.env.DISCORD_CLIENT_ID) {
+      await rest.put(
+        Routes.applicationCommands(process.env.DISCORD_CLIENT_ID),
+        { body: commands }
+      );
+      console.log('Successfully reloaded GLOBAL application (/) commands.');
+      console.log('Note: Global commands may take up to 1 hour to appear in all servers.');
+    }
 
-    console.log('Successfully reloaded application (/) commands.');
+    // Register commands for specific guilds (instant - for testing)
+    for (const [guildId, guild] of client.guilds.cache) {
+      try {
+        await rest.put(
+          Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guildId),
+          { body: commands }
+        );
+        console.log(`✅ Commands registered for guild: ${guild.name} (${guildId})`);
+      } catch (guildError) {
+        console.error(`❌ Failed to register commands for ${guild.name}:`, guildError.message);
+      }
+    }
+
+    console.log('\n📋 Available commands:');
+    commands.forEach(cmd => console.log(`   /${cmd.name} - ${cmd.description}`));
+    
   } catch (error) {
     console.error('Error registering commands:', error);
   }

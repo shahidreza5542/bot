@@ -6,8 +6,8 @@ const warnings = new Map();
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('warn')
-    .setDescription('Warn a user')
-    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+    .setDescription('Warn a user (Admin Only)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addUserOption(option =>
       option
         .setName('user')
@@ -53,7 +53,7 @@ module.exports = {
           { name: 'Warned By', value: interaction.user.tag },
           { name: 'Total Warnings', value: `${userWarnings.length}` }
         )
-        .setColor(0xFFA500)
+        .setColor(0x4F46E5) // Indigo 600
         .setTimestamp();
 
       await targetUser.send({ embeds: [dmEmbed] });
@@ -70,7 +70,7 @@ module.exports = {
         { name: 'Warned By', value: interaction.user.tag, inline: true },
         { name: 'Total Warnings', value: `${userWarnings.length}`, inline: true }
       )
-      .setColor(0xFFA500)
+      .setColor(0x4F46E5) // Indigo 600
       .setThumbnail(targetUser.displayAvatarURL())
       .setTimestamp();
 

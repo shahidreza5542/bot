@@ -7,13 +7,13 @@ const Parser = require('rss-parser');
 const parser = new Parser();
 
 module.exports = {
-  name: 'ready',
+  name: 'clientReady',
   once: true,
   async execute(client) {
     console.log(`Bot logged in as ${client.user.tag}`);
     
     // Set bot activity
-    client.user.setActivity('with Dashboard | /help', {
+    client.user.setActivity('/help | Toolmetry AI Bot', {
       type: ActivityType.Playing
     });
 

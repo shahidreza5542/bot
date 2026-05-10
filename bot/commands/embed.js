@@ -3,8 +3,8 @@ const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ChannelType } = 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('embed')
-    .setDescription('Create a custom embed message')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+    .setDescription('Create a custom embed message (Admin Only)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(option =>
       option
         .setName('title')
@@ -18,7 +18,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('color')
-        .setDescription('Embed color (hex code like #00D4AA)')
+        .setDescription('Embed color (hex code like #4F46E5)')
         .setRequired(false))
     .addStringOption(option =>
       option
@@ -60,7 +60,7 @@ module.exports = {
   async execute(interaction) {
     const title = interaction.options.getString('title');
     const description = interaction.options.getString('description');
-    const colorInput = interaction.options.getString('color') || '#00D4AA';
+    const colorInput = interaction.options.getString('color') || '#4F46E5'; // Indigo 600 default
     const footer = interaction.options.getString('footer');
     const footerImage = interaction.options.getString('footer_image');
     const image = interaction.options.getString('image');
@@ -70,7 +70,7 @@ module.exports = {
     const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
 
     // Convert hex color to integer
-    const color = parseInt(colorInput.replace('#', ''), 16) || 0x00D4AA;
+    const color = parseInt(colorInput.replace('#', ''), 16) || 0x4F46E5;
 
     const embed = new EmbedBuilder()
       .setTitle(title)

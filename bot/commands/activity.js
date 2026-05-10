@@ -82,12 +82,12 @@ module.exports = {
       const fact = facts[Math.floor(Math.random() * facts.length)];
       const embed = new EmbedBuilder()
         .setTitle('📚 Did You Know?')
-        .setDescription(`@everyone\n\n**${fact}**`)
-        .setColor(0x00D4AA)
+        .setDescription(`**${fact}**`)
+        .setColor(0x4F46E5) // Indigo 600
         .setFooter({ text: `Fact shared by ${interaction.user.tag} • Toolmetry AI` })
         .setTimestamp();
 
-      await targetChannel.send({ embeds: [embed], content: '@everyone' });
+      await targetChannel.send({ embeds: [embed] });
       await interaction.reply({ content: `✅ Fun fact sent to ${targetChannel}`, ephemeral: true });
     }
   }

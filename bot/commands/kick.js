@@ -1,11 +1,10 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
-const Ban = require('../../models/Ban');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('kick')
-    .setDescription('Kick a user from the server')
-    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+    .setDescription('Kick a user from the server (Admin Only)')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addUserOption(option =>
       option
         .setName('user')
@@ -47,39 +46,19 @@ module.exports = {
     try {
       await member.kick(`${reason} | By: ${interaction.user.tag}`);
 
-      const kick = new Ban({
-        guildId: interaction.guild.id,
-        userId: user.id,
-        username: user.username,
-        moderatorId: interaction.user.id,
-        reason,
-        type: 'kick',
-        active: false
-      });
-
-      await kick.save();
 
       const embed = new EmbedBuilder()
-        .setTitle('User Kicked')
+        .setTitle('👢 User Kicked')
         .setDescription(`${user.tag} has been kicked`)
         .addFields(
           { name: 'Reason', value: reason },
           { name: 'Moderator', value: interaction.user.tag }
         )
-        .setColor(0xffa500)
+        .setColor(0x4F46E5) // Indigo 600
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
 
-      // Log to mod channel
-      const Guild = require('../../models/Guild');
-      const guildSettings = await Guild.findOne({ guildId: interaction.guild.id });
-      if (guildSettings?.moderation?.logChannelId) {
-        const logChannel = interaction.guild.channels.cache.get(guildSettings.moderation.logChannelId);
-        if (logChannel) {
-          await logChannel.send({ embeds: [embed] });
-        }
-      }
     } catch (err) {
       console.error('Error kicking user:', err);
       await interaction.reply({
