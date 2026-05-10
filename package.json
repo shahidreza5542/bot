@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "node deploy-commands.js && nodemon server.js",
     "deploy": "node deploy-commands.js",
     "setup": "./start.sh"
   },
