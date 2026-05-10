@@ -1,9 +1,11 @@
 const { EmbedBuilder } = require('discord.js');
 const axios = require('axios');
+const { tickets } = require('../commands/ticket');
 
 // Track user activity
 const userActivity = new Map();
 const lastRoasted = new Map();
+const ticketResponses = new Map(); // Track AI responses per ticket
 
 // Free AI roast generator
 async function generateAIRoast(username) {
@@ -22,6 +24,24 @@ async function generateAIRoast(username) {
   }
 }
 
+// AI-powered support response
+async function generateAISupportResponse(userMessage, ticketSubject) {
+  try {
+    const prompt = `You are a helpful AI support assistant for Toolmetry AI. The user has a ticket with subject: "${ticketSubject}". Their message is: "${userMessage}". Provide a helpful, friendly response. Keep it under 200 characters. Be professional but conversational.`;
+    const response = await axios.get(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?seed=${Date.now()}&json=false`, { timeout: 5000 });
+    return response.data || "I'm here to help! Could you provide more details about your issue?";
+  } catch (error) {
+    console.error('AI Support Error:', error.message);
+    const fallbackResponses = [
+      "I'm here to help! Could you provide more details about your issue?",
+      "Thank you for reaching out! Let me assist you with this.",
+      "I understand your concern. Could you tell me more about what's happening?",
+      "I'm happy to help! Please share more information so I can better assist you."
+    ];
+    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+  }
+}
+
 module.exports = {
   name: 'messageCreate',
   async execute(message) {
@@ -33,6 +53,39 @@ module.exports = {
 
     // Update activity
     userActivity.set(userId, now);
+
+    // AI Support for Tickets
+    if (message.channel.name.startsWith('ticket-')) {
+      // Check if this is a ticket channel
+      let ticket = null;
+      for (const [id, t] of tickets) {
+        if (t.channelId === message.channel.id && t.status === 'open') {
+          ticket = t;
+          break;
+        }
+      }
+
+      if (ticket) {
+        // Check if we've already responded recently (avoid spam)
+        const lastResponse = ticketResponses.get(ticket.ticketId) || 0;
+        const timeSinceResponse = now - lastResponse;
+
+        // Only respond if it's been at least 10 seconds since last AI response
+        if (timeSinceResponse > 10000) {
+          const aiResponse = await generateAISupportResponse(message.content, ticket.subject);
+
+          const embed = new EmbedBuilder()
+            .setTitle('🤖 AI Support Response')
+            .setDescription(aiResponse)
+            .setColor(0x00D4AA)
+            .setFooter({ text: 'Powered by AI • Toolmetry AI Support' })
+            .setTimestamp();
+
+          await message.channel.send({ embeds: [embed] });
+          ticketResponses.set(ticket.ticketId, now);
+        }
+      }
+    }
 
     // Check for inactive users to roast (every 10 messages)
     if (message.guild && Math.random() < 0.1) {
