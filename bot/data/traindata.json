@@ -80,8 +80,8 @@
     "apiAccess": {
       "patterns": ["api", "developer", "integration", "programmatic access", "code", "api key"],
       "responses": {
-        "en": "👨‍💻 Developer? Currently, tools are web-based only. For API access:\n• Contact us with your use case\n• We're building API endpoints\n• Priority access for beta testers\nEmail: support@toolmetry.com with 'API Request' in subject!",
-        "hi": "👨‍💻 Developer? Abhi tools web-based hain. API access ke liye:\n• Apna use case batakar contact karein\n• Hum API endpoints bana rahe hain\n• Beta testers ko priority access\nEmail: support@toolmetry.com subject mein 'API Request' likhein!"
+        "en": "👨‍💻 Developer? Currently, tools are web-based only. For API access:\n• Contact us with your use case\n• We're building API endpoints\n• Priority access for beta testers\nEmail: toolmetryai@gmail.com with 'API Request' in subject!",
+        "hi": "👨‍💻 Developer? Abhi tools web-based hain. API access ke liye:\n• Apna use case batakar contact karein\n• Hum API endpoints bana rahe hain\n• Beta testers ko priority access\nEmail: toolmetryai@gmail.com subject mein 'API Request' likhein!"
       }
     },
     "download": {
@@ -101,8 +101,8 @@
     "contact": {
       "patterns": ["contact", "email", "reach", "message", "feedback", "suggestion", "report"],
       "responses": {
-        "en": "📧 Reach us at:\n• Email: support@toolmetry.com\n• Discord: Join our server\n• Twitter: @ToolmetryAI\nWe typically respond within 24 hours!",
-        "hi": "📧 Humse contact karein:\n• Email: support@toolmetry.com\n• Discord: Hamara server join karein\n• Twitter: @ToolmetryAI\nHum typically 24 hours mein respond karte hain!"
+        "en": "📧 Reach us at:\n• Email: toolmetryai@gmail.com\n• Discord: Join our server\n• Twitter: @ToolmetryAI\nWe typically respond within 24 hours!",
+        "hi": "📧 Humse contact karein:\n• Email: toolmetryai@gmail.com\n• Discord: Hamara server join karein\n• Twitter: @ToolmetryAI\nHum typically 24 hours mein respond karte hain!"
       }
     },
     "websiteLink": {
@@ -115,8 +115,8 @@
     "humanSupport": {
       "patterns": ["human", "talk to agent", "customer care", "insaan se baat", "support se baat", "staff", "team"],
       "responses": {
-        "en": "👨‍💼 Need human help? I'm tagging our support team!\n\nPlease wait while our team reviews your query. For urgent issues, email support@toolmetry.com",
-        "hi": "👨‍💼 Insaan ki madad chahiye? Main support team ko tag kar raha hu!\n\nKripya wait karein jab tak hamari team aapki query review karti hai. Urgent issues ke liye email karein: support@toolmetry.com"
+        "en": "👨‍💼 Need human help? I'm tagging our support team!\n\nPlease wait while our team reviews your query. For urgent issues, email toolmetryai@gmail.com",
+        "hi": "👨‍💼 Insaan ki madad chahiye? Main support team ko tag kar raha hu!\n\nKripya wait karein jab tak hamari team aapki query review karti hai. Urgent issues ke liye email karein: toolmetryai@gmail.com"
       }
     },
     "thanks": {
@@ -199,15 +199,15 @@
     "featureRequest": {
       "patterns": ["feature request", "new feature", "feature suggestion", "add feature", "feature add karo", "new tool", "tool request"],
       "responses": {
-        "en": "💡 Feature Request?\nWe love to hear from users! Submit your ideas:\n• Email: support@toolmetry.com\n• Subject: 'Feature Request'\n• Describe your idea\nWe'll review and consider it for future updates!",
-        "hi": "💡 Feature Request?\nHum users se sunna pasand karte hain! Apne ideas submit karein:\n• Email: support@toolmetry.com\n• Subject: 'Feature Request'\n• Apna idea describe karein\nHum review karke future updates mein consider karenge!"
+        "en": "💡 Feature Request?\nWe love to hear from users! Submit your ideas:\n• Email: toolmetryai@gmail.com\n• Subject: 'Feature Request'\n• Describe your idea\nWe'll review and consider it for future updates!",
+        "hi": "💡 Feature Request?\nHum users se sunna pasand karte hain! Apne ideas submit karein:\n• Email: toolmetryai@gmail.com\n• Subject: 'Feature Request'\n• Apna idea describe karein\nHum review karke future updates mein consider karenge!"
       }
     },
     "bugReport": {
       "patterns": ["bug", "bug report", "issue", "problem report", "found bug", "bug mila", "error report", "glitch report"],
       "responses": {
-        "en": "🐛 Found a bug? Report it!\n• Email: support@toolmetry.com\n• Subject: 'Bug Report'\n• Include: Tool name, steps to reproduce, screenshot\nWe'll fix it ASAP! Thanks for helping us improve!",
-        "hi": "🐛 Bug mil gaya? Report karein!\n• Email: support@toolmetry.com\n• Subject: 'Bug Report'\n• Include: Tool ka naam, steps reproduce, screenshot\nHum fix kar denge ASAP! Improve karne ke liye thanks!"
+        "en": "🐛 Found a bug? Report it!\n• Email: toolmetryai@gmail.com\n• Subject: 'Bug Report'\n• Include: Tool name, steps to reproduce, screenshot\nWe'll fix it ASAP! Thanks for helping us improve!",
+        "hi": "🐛 Bug mil gaya? Report karein!\n• Email: toolmetryai@gmail.com\n• Subject: 'Bug Report'\n• Include: Tool ka naam, steps reproduce, screenshot\nHum fix kar denge ASAP! Improve karne ke liye thanks!"
       }
     },
     "security": {
@@ -241,8 +241,8 @@
     "feedback": {
       "patterns": ["feedback", "review", "testimonial", "opinion", "suggestion", "improvement", "rate"],
       "responses": {
-        "en": "⭐ Share Your Feedback!\nWe value your opinion:\n• Rate us on Trustpilot\n• Leave a review on our Discord\n• Email suggestions to support@toolmetry.com\n• Help us improve Toolmetry!",
-        "hi": "⭐ Apna Feedback Share Karein!\nHum aapki opinion value karte hain:\n• Trustpilot par rate karein\n• Hamare Discord par review chodein\n• Suggestions email karein support@toolmetry.com\n• Toolmetry improve karne mein help karein!"
+        "en": "⭐ Share Your Feedback!\nWe value your opinion:\n• Rate us on Trustpilot\n• Leave a review on our Discord\n• Email suggestions to toolmetryai@gmail.com\n• Help us improve Toolmetry!",
+        "hi": "⭐ Apna Feedback Share Karein!\nHum aapki opinion value karte hain:\n• Trustpilot par rate karein\n• Hamare Discord par review chodein\n• Suggestions email karein toolmetryai@gmail.com\n• Toolmetry improve karne mein help karein!"
       }
     }
   },
@@ -250,8 +250,8 @@
     "hindiWords": ["hai", "kya", "kaise", "karo", "kar", "karein", "hain", "hoga", "batao", "bataiye", "madad", "swagat", "dhanyawad", "shukriya", "nahi", "batao", "mujhe", "chahiye", "kaam", "kaunsa", "kab", "kahan", "aur", "yeh", "woh", "aap", "tum", "mera", "tera", "hamara", "kitna", "itna", "utna", "accha", "bura", "naya", "purana", "chota", "bada", "jaldi", "dheere", "aaj", "kal", "parso", "din", "raat", "subah", "shaam", "kya", "kaise", "kab", "kahan", "kaun", "kiska", "kiski", "kisne", "kya", "kyun", "kyunki", "lekin", "magar", "par", "ya", "ya phir", "to", "tab", "jab", "tak", "jaise", "jaisa", "sabse", "sab", "sabhi", "kuch", "kuchh", "kuchh", "bilkul", "bilkul", "zaroor", "zaroor", "zaroor", "sahi", "galat", "theek", "acha", "bura", "behtareen", "badhiya", "zyada", "kam", "bahut", "bahut", "bohot", "thoda", "thodi", "zyada", "kam", "pura", "puri", "poora", "poori", "sara", "sari", "sab", "sabhi", "iske", "iski", "uska", "uski", "unka", "unki", "apna", "apni", "apne", "hamara", "hamari", "hamare", "tumhara", "tumhari", "tumhare", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari"]
   },
   "fallbackResponses": {
-    "en": "I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email support@toolmetry.com",
-    "hi": "Is specific query ke baare mein mujhe sure nahi hai. Main support team ko tag kar raha hu aapki madad ke liye!\n\nTab tak aap Help Center check kar sakte hain ya email karein: support@toolmetry.com"
+    "en": "I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email toolmetryai@gmail.com",
+    "hi": "Is specific query ke baare mein mujhe sure nahi hai. Main support team ko tag kar raha hu aapki madad ke liye!\n\nTab tak aap Help Center check kar sakte hain ya email karein: toolmetryai@gmail.com"
   },
   "unknownQueryTagStaff": true,
   "staffRoleIds": ["1502913220392784053", "1502913221919637586"],
