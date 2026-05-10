@@ -1,0 +1,95 @@
+{
+  "knowledgeBase": {
+    "greetings": {
+      "patterns": ["hi", "hello", "hey", "koi hai", "namaste", "hola"],
+      "responses": {
+        "en": "Hello! Welcome to Toolmetry support. How can I assist you today?",
+        "hi": "Namaste! Toolmetry support mein aapka swagat hai. Main aapki kaise madad kar sakta hu?"
+      }
+    },
+    "whatIsToolmetry": {
+      "patterns": ["what is toolmetry", "toolmetry kya hai", "ye website kis liye hai", "what does toolmetry do"],
+      "responses": {
+        "en": "Toolmetry is your go-to platform for useful online tools designed to make your daily tasks easier. From utilities to productivity tools, we've got you covered!",
+        "hi": "Toolmetry ek aisi jagah hai jahan aapko aapke kaam aane wale behtareen tools milte hain. Ye aapke daily tasks ko aasan banane ke liye design kiya gaya hai."
+      }
+    },
+    "passwordReset": {
+      "patterns": ["password reset", "forgot password", "password bhool gaya", "reset password"],
+      "responses": {
+        "en": "To reset your password, click on 'Forgot Password' on the login page. You'll receive a reset link on your registered email.",
+        "hi": "Password reset karne ke liye login page par 'Forgot Password' par click karein. Aapko registered email par ek reset link mil jayega."
+      }
+    },
+    "newAccount": {
+      "patterns": ["new account", "sign up", "register", "naya account", "account kaise banaye"],
+      "responses": {
+        "en": "Click the 'Sign Up' button in the top right corner of the website and register using your email ID.",
+        "hi": "Aap website ke top right corner mein 'Sign Up' button par click karke apni email ID se naya account bana sakte hain."
+      }
+    },
+    "howToUseTools": {
+      "patterns": ["how to use", "tool use", "kaise use karein", "tools ko kaise use karein"],
+      "responses": {
+        "en": "Each tool has a guide on its page. Simply input your details and the tool will give you results instantly!",
+        "hi": "Har tool ke page par ek chhota sa guide ya description diya gaya hai ki use kaise istemaal karna hai. Bas apni details input karein aur tool aapko result de dega."
+      }
+    },
+    "mobileSupport": {
+      "patterns": ["mobile", "phone", "android", "ios", "mobile par chalegi"],
+      "responses": {
+        "en": "Yes! Toolmetry is fully mobile-responsive. You can use it on your phone's browser without any issues.",
+        "hi": "Haan, Toolmetry poori tarah se mobile-responsive hai. Aap ise apne phone ke browser par aaram se use kar sakte hain."
+      }
+    },
+    "toolError": {
+      "patterns": ["error", "not working", "problem", "issue", "error aa raha hai"],
+      "responses": {
+        "en": "Please refresh the page and try again. If the problem persists, please let us know which tool you were using so we can assist better.",
+        "hi": "Kripya page ko refresh karein aur dobara try karein. Agar problem phir bhi aaye, toh humein detail mein batayein ki aap kaunsa tool use kar rahe the."
+      }
+    },
+    "pricing": {
+      "patterns": ["free", "price", "cost", "pricing", "kitne paise", "free hai"],
+      "responses": {
+        "en": "Yes, most tools on Toolmetry are free to use. If there's any premium feature, it will be clearly mentioned on the tool page.",
+        "hi": "Haan, Toolmetry par uplabdh tools aam taur par free hain. Agar koi premium feature hoga toh wahan mention kiya jayega."
+      }
+    },
+    "apiAccess": {
+      "patterns": ["api", "developer", "integration", "programmatic access"],
+      "responses": {
+        "en": "Currently, our tools are designed for direct website use. For API access details, please check our documentation or contact support.",
+        "hi": "Abhi ke liye hamare tools directly website ke through use kiye ja sakte hain. API access ki details ke liye aap documentation check kar sakte hain."
+      }
+    },
+    "humanSupport": {
+      "patterns": ["human", "talk to agent", "customer care", "insaan se baat", "support se baat"],
+      "responses": {
+        "en": "I'm transferring your query to our human support team. They will contact you via email or chat shortly.",
+        "hi": "Main abhi aapki query hamari human support team ko transfer kar raha hu. Wo jald hi aapse email ya chat ke zariye contact karenge."
+      }
+    },
+    "thanks": {
+      "patterns": ["thank", "shukriya", "dhanyawad", "thanks"],
+      "responses": {
+        "en": "You're welcome! Is there anything else I can help you with?",
+        "hi": "Aapka swagat hai! Kya main aapki aur koi madad kar sakta hu?"
+      }
+    },
+    "goodbye": {
+      "patterns": ["bye", "goodbye", "alvida", "take care"],
+      "responses": {
+        "en": "Goodbye! Have a great day. Feel free to reach out anytime you need help!",
+        "hi": "Alvida! Aapka din shubh ho. Jab bhi aapko madad chahiye, zaroor sampark karein!"
+      }
+    }
+  },
+  "languageDetection": {
+    "hindiWords": ["hai", "kya", "kaise", "karo", "kar", "karein", "hain", "hoga", "batao", "bataiye", "madad", "swagat", "dhanyawad", "shukriya", "nahi", "batao", "mujhe", "chahiye", "kaam", "kaise", "kaunsa", "kab", "kahan"]
+  },
+  "fallbackResponses": {
+    "en": "I'm here to help! Could you provide more details about your issue?",
+    "hi": "Main aapki madad ke liye yahan hu! Kripya apni samasya ke baare mein aur bataein?"
+  }
+}
