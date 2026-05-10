@@ -115,8 +115,8 @@
     "humanSupport": {
       "patterns": ["human", "talk to agent", "customer care", "insaan se baat", "support se baat", "staff", "team"],
       "responses": {
-        "en": "👨‍💼 Need human help? I'm tagging our support team! @here\n\nPlease wait while our team reviews your query. For urgent issues, email support@toolmetry.com",
-        "hi": "👨‍💼 Insaan ki madad chahiye? Main support team ko tag kar raha hu! @here\n\nKripya wait karein jab tak hamari team aapki query review karti hai. Urgent issues ke liye email karein: support@toolmetry.com"
+        "en": "👨‍💼 Need human help? I'm tagging our support team!\n\nPlease wait while our team reviews your query. For urgent issues, email support@toolmetry.com",
+        "hi": "👨‍💼 Insaan ki madad chahiye? Main support team ko tag kar raha hu!\n\nKripya wait karein jab tak hamari team aapki query review karti hai. Urgent issues ke liye email karein: support@toolmetry.com"
       }
     },
     "thanks": {
@@ -132,16 +132,129 @@
         "en": "👋 Goodbye! Have an awesome day! Remember, we're always here when you need help. See you soon!",
         "hi": "👋 Alvida! Aapka din shubh ho! Yaad rakhein, jab bhi madad chahiye hum yahan hain. Phir milenge!"
       }
+    },
+    "accountVerification": {
+      "patterns": ["verify", "verification", "email verify", "email not verified", "account verify", "verification email", "verify account", "email verification"],
+      "responses": {
+        "en": "✉️ To verify your account:\n1. Check your email inbox\n2. Look for 'Verify Email' from Toolmetry\n3. Click the verification link\n4. If not found, check spam folder\n5. Request new verification link if expired!",
+        "hi": "✉️ Account verify karne ke liye:\n1. Apna email inbox check karein\n2. Toolmetry se 'Verify Email' dhoondhein\n3. Verification link par click karein\n4. Agar nahi mila, spam folder check karein\n5. Agar link expire ho gaya, naya link request karein!"
+      }
+    },
+    "accountDelete": {
+      "patterns": ["delete account", "account delete", "remove account", "delete my account", "account kaise delete kare", "cancel account", "account termination"],
+      "responses": {
+        "en": "🗑️ To delete your account:\n1. Login to your account\n2. Go to Settings\n3. Click 'Delete Account'\n4. Confirm your password\n5. Confirm deletion\n⚠️ This action cannot be undone!",
+        "hi": "🗑️ Account delete karne ke liye:\n1. Apne account mein login karein\n2. Settings par jayein\n3. 'Delete Account' par click karein\n4. Apna password confirm karein\n5. Deletion confirm karein\n⚠️ Ye action undo nahi ho sakta!"
+      }
+    },
+    "textTools": {
+      "patterns": ["text tools", "text converter", "case converter", "word counter", "character counter", "text manipulation", "text format"],
+      "responses": {
+        "en": "📝 Text Tools available:\n• Case Converter (UPPER, lower, Title Case)\n• Word Counter (count words & characters)\n• Text Formatter (remove spaces, etc.)\n• Lorem Ipsum Generator\n• Text Replacer & more!",
+        "hi": "📝 Text Tools available:\n• Case Converter (UPPER, lower, Title Case)\n• Word Counter (words & characters count)\n• Text Formatter (spaces remove, etc.)\n• Lorem Ipsum Generator\n• Text Replacer aur bhi kuch!"
+      }
+    },
+    "calculatorTools": {
+      "patterns": ["calculator", "calculator tools", "scientific calculator", "bmi calculator", "age calculator", "percentage calculator", "math tools"],
+      "responses": {
+        "en": "🔢 Calculator Tools:\n• Scientific Calculator (advanced math)\n• BMI Calculator (health check)\n• Age Calculator (exact age)\n• Percentage Calculator (quick math)\n• Unit Converter (length, weight, etc.)\n• Loan Calculator & more!",
+        "hi": "🔢 Calculator Tools:\n• Scientific Calculator (advanced math)\n• BMI Calculator (health check)\n• Age Calculator (exact age)\n• Percentage Calculator (quick math)\n• Unit Converter (length, weight, etc.)\n• Loan Calculator aur bhi kuch!"
+      }
+    },
+    "imageTools": {
+      "patterns": ["image tools", "image converter", "image compressor", "image resize", "image editor", "photo tools", "picture tools"],
+      "responses": {
+        "en": "🖼️ Image Tools:\n• Image Compressor (reduce file size)\n• Image Converter (PNG, JPG, WebP)\n• Image Resizer (custom dimensions)\n• Image Cropper (remove edges)\n• Image Filters (brightness, contrast)\n• Watermark Adder & more!",
+        "hi": "🖼️ Image Tools:\n• Image Compressor (file size reduce)\n• Image Converter (PNG, JPG, WebP)\n• Image Resizer (custom dimensions)\n• Image Cropper (edges remove)\n• Image Filters (brightness, contrast)\n• Watermark Adder aur bhi kuch!"
+      }
+    },
+    "generatorTools": {
+      "patterns": ["generator", "generators", "qr code", "password generator", "random generator", "code generator", "qr generator"],
+      "responses": {
+        "en": "🎲 Generator Tools:\n• QR Code Generator (create QR codes)\n• Password Generator (secure passwords)\n• Random Number Generator\n• Lorem Ipsum Generator\n• Color Palette Generator\n• UUID Generator & more!",
+        "hi": "🎲 Generator Tools:\n• QR Code Generator (QR codes create)\n• Password Generator (secure passwords)\n• Random Number Generator\n• Lorem Ipsum Generator\n• Color Palette Generator\n• UUID Generator aur bhi kuch!"
+      }
+    },
+    "developerTools": {
+      "patterns": ["developer tools", "dev tools", "json formatter", "regex tester", "base64 encoder", "html validator", "css minifier", "code tools"],
+      "responses": {
+        "en": "👨‍💻 Developer Tools:\n• JSON Formatter (beautify JSON)\n• Regex Tester (test patterns)\n• Base64 Encoder/Decoder\n• HTML Validator (check code)\n• CSS Minifier (compress CSS)\n• URL Encoder/Decoder & more!",
+        "hi": "👨‍💻 Developer Tools:\n• JSON Formatter (JSON beautify)\n• Regex Tester (patterns test)\n• Base64 Encoder/Decoder\n• HTML Validator (code check)\n• CSS Minifier (CSS compress)\n• URL Encoder/Decoder aur bhi kuch!"
+      }
+    },
+    "dataTools": {
+      "patterns": ["data tools", "csv tools", "excel tools", "data converter", "data format", "spreadsheet tools"],
+      "responses": {
+        "en": "📊 Data Tools:\n• CSV to JSON Converter\n• Excel to CSV Converter\n• JSON to CSV Converter\n• Data Validator\n• XML Formatter\n• YAML Converter & more!",
+        "hi": "📊 Data Tools:\n• CSV to JSON Converter\n• Excel to CSV Converter\n• JSON to CSV Converter\n• Data Validator\n• XML Formatter\n• YAML Converter aur bhi kuch!"
+      }
+    },
+    "networkTools": {
+      "patterns": ["network tools", "ip tools", "url tools", "domain tools", "network", "ip address", "url shortener"],
+      "responses": {
+        "en": "🌐 Network Tools:\n• IP Address Lookup\n• URL Shortener\n• Domain Checker\n• Ping Tool\n• DNS Lookup\n• Whois Lookup & more!",
+        "hi": "🌐 Network Tools:\n• IP Address Lookup\n• URL Shortener\n• Domain Checker\n• Ping Tool\n• DNS Lookup\n• Whois Lookup aur bhi kuch!"
+      }
+    },
+    "featureRequest": {
+      "patterns": ["feature request", "new feature", "feature suggestion", "add feature", "feature add karo", "new tool", "tool request"],
+      "responses": {
+        "en": "💡 Feature Request?\nWe love to hear from users! Submit your ideas:\n• Email: support@toolmetry.com\n• Subject: 'Feature Request'\n• Describe your idea\nWe'll review and consider it for future updates!",
+        "hi": "💡 Feature Request?\nHum users se sunna pasand karte hain! Apne ideas submit karein:\n• Email: support@toolmetry.com\n• Subject: 'Feature Request'\n• Apna idea describe karein\nHum review karke future updates mein consider karenge!"
+      }
+    },
+    "bugReport": {
+      "patterns": ["bug", "bug report", "issue", "problem report", "found bug", "bug mila", "error report", "glitch report"],
+      "responses": {
+        "en": "🐛 Found a bug? Report it!\n• Email: support@toolmetry.com\n• Subject: 'Bug Report'\n• Include: Tool name, steps to reproduce, screenshot\nWe'll fix it ASAP! Thanks for helping us improve!",
+        "hi": "🐛 Bug mil gaya? Report karein!\n• Email: support@toolmetry.com\n• Subject: 'Bug Report'\n• Include: Tool ka naam, steps reproduce, screenshot\nHum fix kar denge ASAP! Improve karne ke liye thanks!"
+      }
+    },
+    "security": {
+      "patterns": ["security", "safe", "secure", "data protection", "privacy", "encryption", "https"],
+      "responses": {
+        "en": "🔒 Security is our priority:\n✅ All data processed in browser\n✅ No data stored on servers\n✅ HTTPS encryption everywhere\n✅ No third-party tracking\n✅ Regular security audits\nYour data is always safe!",
+        "hi": "🔒 Security hamari priority hai:\n✅ Saara data browser mein process hota hai\n✅ Koi data servers par store nahi hota\n✅ Har jagah HTTPS encryption\n✅ Koi third-party tracking nahi\n✅ Regular security audits\nAapka data hamesha safe hai!"
+      }
+    },
+    "updates": {
+      "patterns": ["updates", "new features", "what's new", "changelog", "version", "latest version", "new tools"],
+      "responses": {
+        "en": "🆕 What's New?\nCheck our changelog at toolmetry.com/updates\nRecent additions: New tools, UI improvements, bug fixes, performance enhancements. Subscribe to our newsletter for updates!",
+        "hi": "🆕 Kya Naya Hai?\nHamara changelog check karein toolmetry.com/updates\nRecent additions: Naye tools, UI improvements, bug fixes, performance enhancements. Updates ke liye newsletter subscribe karein!"
+      }
+    },
+    "help": {
+      "patterns": ["help", "assist", "support", "guidance", "tutorial", "how to", "guide", "instructions"],
+      "responses": {
+        "en": "❓ Need Help?\n• Browse our Help Center\n• Check tool-specific guides\n• Contact support team\n• Join our Discord community\n• Read our documentation\nWe're here to help!",
+        "hi": "❓ Help Chahiye?\n• Hamara Help Center browse karein\n• Tool-specific guides check karein\n• Support team se contact karein\n• Hamari Discord community join karein\n• Hamari documentation padhein\nHum yahan madad ke liye hain!"
+      }
+    },
+    "serverStatus": {
+      "patterns": ["server status", "is it down", "website down", "not loading", "server issue", "maintenance", "outage"],
+      "responses": {
+        "en": "🟢 Server Status:\n• All systems operational\n• Check status.toolmetry.com for real-time updates\n• Follow @ToolmetryStatus on Twitter for alerts\n• Scheduled maintenance announced in advance",
+        "hi": "🟢 Server Status:\n• Saare systems operational\n• Real-time updates ke liye status.toolmetry.com check karein\n• Alerts ke liye @ToolmetryStatus Twitter par follow karein\n• Scheduled maintenance advance mein announce hota hai"
+      }
+    },
+    "feedback": {
+      "patterns": ["feedback", "review", "testimonial", "opinion", "suggestion", "improvement", "rate"],
+      "responses": {
+        "en": "⭐ Share Your Feedback!\nWe value your opinion:\n• Rate us on Trustpilot\n• Leave a review on our Discord\n• Email suggestions to support@toolmetry.com\n• Help us improve Toolmetry!",
+        "hi": "⭐ Apna Feedback Share Karein!\nHum aapki opinion value karte hain:\n• Trustpilot par rate karein\n• Hamare Discord par review chodein\n• Suggestions email karein support@toolmetry.com\n• Toolmetry improve karne mein help karein!"
+      }
     }
   },
   "languageDetection": {
-    "hindiWords": ["hai", "kya", "kaise", "karo", "kar", "karein", "hain", "hoga", "batao", "bataiye", "madad", "swagat", "dhanyawad", "shukriya", "nahi", "batao", "mujhe", "chahiye", "kaam", "kaunsa", "kab", "kahan", "aur", "yeh", "woh", "aap", "tum", "mera", "tera", "hamara", "kitna", "itna", "utna", "accha", "bura", "naya", "purana", "chota", "bada", "jaldi", "dheere", "aaj", "kal", "parso", "din", "raat", "subah", "shaam"]
+    "hindiWords": ["hai", "kya", "kaise", "karo", "kar", "karein", "hain", "hoga", "batao", "bataiye", "madad", "swagat", "dhanyawad", "shukriya", "nahi", "batao", "mujhe", "chahiye", "kaam", "kaunsa", "kab", "kahan", "aur", "yeh", "woh", "aap", "tum", "mera", "tera", "hamara", "kitna", "itna", "utna", "accha", "bura", "naya", "purana", "chota", "bada", "jaldi", "dheere", "aaj", "kal", "parso", "din", "raat", "subah", "shaam", "kya", "kaise", "kab", "kahan", "kaun", "kiska", "kiski", "kisne", "kya", "kyun", "kyunki", "lekin", "magar", "par", "ya", "ya phir", "to", "tab", "jab", "tak", "jaise", "jaisa", "sabse", "sab", "sabhi", "kuch", "kuchh", "kuchh", "bilkul", "bilkul", "zaroor", "zaroor", "zaroor", "sahi", "galat", "theek", "acha", "bura", "behtareen", "badhiya", "zyada", "kam", "bahut", "bahut", "bohot", "thoda", "thodi", "zyada", "kam", "pura", "puri", "poora", "poori", "sara", "sari", "sab", "sabhi", "iske", "iski", "uska", "uski", "unka", "unki", "apna", "apni", "apne", "hamara", "hamari", "hamare", "tumhara", "tumhari", "tumhare", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari", "iski", "uski", "unki", "apki", "hamari", "tumhari"]
   },
   "fallbackResponses": {
-    "en": "I'm not sure about that specific query. Let me tag our support team to help you! @here\n\nMeanwhile, you can check our Help Center or email support@toolmetry.com",
-    "hi": "Is specific query ke baare mein mujhe sure nahi hai. Main support team ko tag kar raha hu aapki madad ke liye! @here\n\nTab tak aap Help Center check kar sakte hain ya email karein: support@toolmetry.com"
+    "en": "I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email support@toolmetry.com",
+    "hi": "Is specific query ke baare mein mujhe sure nahi hai. Main support team ko tag kar raha hu aapki madad ke liye!\n\nTab tak aap Help Center check kar sakte hain ya email karein: support@toolmetry.com"
   },
   "unknownQueryTagStaff": true,
+  "staffRoleIds": ["1502913220392784053", "1502913221919637586"],
   "spamPrevention": {
     "cooldownSeconds": 20,
     "maxMessagesPerMinute": 3,
