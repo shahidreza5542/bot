@@ -1,6 +1,20 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const axios = require('axios');
 
+// Fallback jokes
+const fallbackJokes = [
+  "Why don't scientists trust atoms? Because they make up everything!",
+  "Why did the scarecrow win an award? He was outstanding in his field!",
+  "What do you call a fake noodle? An impasta!",
+  "Why did the bicycle fall over? Because it was two-tired!",
+  "What do you call a bear with no teeth? A gummy bear!",
+  "Why don't eggs tell jokes? They'd crack each other up!",
+  "What do you call a fish without eyes? A fsh!",
+  "Why did the math book look so sad? Because it had too many problems!",
+  "What do you call a dinosaur that crashes their car? Tyrannosaurus Wrecks!",
+  "Why did the coffee file a police report? It got mugged!"
+];
+
 // Fetch meme from Reddit API
 async function fetchMeme(subreddit = 'memes') {
   try {
@@ -14,9 +28,13 @@ async function fetchMeme(subreddit = 'memes') {
     // Fallback to default memes
     return {
       url: "https://i.redd.it/qftn4v55090h1.png",
+      preview: [
+        "https://preview.redd.it/qftn4v55090h1.png?width=640&crop=smart&auto=webp&s=91443426bee29a7f2ec5bab7d7d8f9a6e3260b1c"
+      ],
       title: "Why did the chicken cross the road? To get to the other side!",
       subreddit: "memes",
-      postLink: "https://reddit.com/r/memes"
+      postLink: "https://reddit.com/r/memes",
+      ups: 100
     };
   }
 }
@@ -24,7 +42,7 @@ async function fetchMeme(subreddit = 'memes') {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('joke')
-    .setDescription('Get a random meme from Reddit')
+    .setDescription('Get a random joke with image')
     .addStringOption(option =>
       option
         .setName('subreddit')
@@ -39,7 +57,7 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName('delivery')
-        .setDescription('How to deliver the meme')
+        .setDescription('How to deliver the joke')
         .setRequired(false)
         .addChoices(
           { name: 'Just me', value: 'personal' },
@@ -57,14 +75,22 @@ module.exports = {
     }
 
     const meme = await fetchMeme(subreddit);
+    
+    // Get preview image (use 640px width for best quality)
+    const previewImage = meme.preview && meme.preview.length > 0 
+      ? meme.preview[Math.floor(meme.preview.length / 2)] // Use middle preview
+      : meme.url;
+
+    // Get random joke from fallback
+    const randomJoke = fallbackJokes[Math.floor(Math.random() * fallbackJokes.length)];
 
     const embed = new EmbedBuilder()
-      .setTitle(meme.title)
-      .setDescription(`🎭 From r/${meme.subreddit}`)
-      .setImage(meme.url)
+      .setTitle('🤣 Joke + Meme!')
+      .setDescription(`**${randomJoke}**\n\n🎭 Meme: ${meme.title}`)
+      .setImage(previewImage)
       .setURL(meme.postLink)
       .setColor(0xFFD700)
-      .setFooter({ text: `👍 ${meme.ups} upvotes • Toolmetry AI Bot` })
+      .setFooter({ text: `👍 ${meme.ups} upvotes • r/${meme.subreddit} • Toolmetry AI Bot` })
       .setTimestamp();
 
     if (delivery === 'everyone') {
