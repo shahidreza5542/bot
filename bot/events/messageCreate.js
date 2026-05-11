@@ -10,7 +10,7 @@ const trainData = require('../data/traindata.json');
 const knowledgeBase = trainData.knowledgeBase;
 
 // English only fallback
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@example.com';
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
 const fallbackResponse = `I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email ${SUPPORT_EMAIL}`;
 
 // Track user activity
