@@ -1,7 +1,7 @@
 {
   "knowledgeBase": {
     "greetings": {
-      "patterns": ["hi", "hello", "hey", "koi hai", "namaste", "hola", "yo", "sup", "wassup"],
+      "patterns": ["hi", "hlo", "hello", "hey", "koi hai", "namaste", "hola", "yo", "sup", "wassup"],
       "responses": {
         "en": "Hello! Welcome to Toolmetry support. How can I assist you today? 😊",
         "hi": "Namaste! Toolmetry support mein aapka swagat hai. Main aapki kaise madad kar sakta hu? 🙏"
