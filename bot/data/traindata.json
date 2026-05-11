@@ -1,14 +1,14 @@
 {
   "knowledgeBase": {
     "greetings": {
-      "patterns": ["hi", "hlo", "hello", "hey", "koi hai", "namaste", "hola", "yo", "sup", "wassup"],
+      "patterns": ["hi", "hlo", "hello", "hey", "koi hai", "namaste", "hola", "yo", "sup", "wassup", "hii", "heyy", "helloo", "helo", "helo", "hlw"],
       "responses": {
         "en": "Hello! Welcome to Toolmetry support. How can I assist you today? 😊",
         "hi": "Namaste! Toolmetry support mein aapka swagat hai. Main aapki kaise madad kar sakta hu? 🙏"
       }
     },
     "whatIsToolmetry": {
-      "patterns": ["what is toolmetry", "toolmetry kya hai", "ye website kis liye hai", "what does toolmetry do", "about toolmetry", "toolmetry ke baare mein"],
+      "patterns": ["what is toolmetry", "toolmetry kya hai", "ye website kis liye hai", "what does toolmetry do", "about toolmetry", "toolmetry ke baare mein", "what is toolmetryai", "toolmetry ai kya hai", "what is toolmetry ai", "toolmetryai kya hai", "toolmetry ai ke baare mein", "toolmetryai about", "tell me about toolmetry", "toolmetry kaam kya karta hai"],
       "responses": {
         "en": "🛠️ Toolmetry is your all-in-one platform for useful online tools! From text converters to calculators, image tools to generators - we make your daily tasks easier. All tools are free and easy to use!",
         "hi": "🛠️ Toolmetry aapke liye useful online tools ka ek complete platform hai! Text converters se lekar calculators, image tools se generators tak - hum aapke daily tasks aasan banate hain. Sab tools free aur easy to use hain!"
@@ -120,7 +120,7 @@
       }
     },
     "thanks": {
-      "patterns": ["thank", "shukriya", "dhanyawad", "thanks", "thankyou", "ty", "tysm"],
+      "patterns": ["thank you", "thanks", "thankyou", "shukriya", "dhanyawad", "ty", "tysm", "thank u", "thankyou very much", "thanks a lot", "shukriya bhai", "dhanyawad bhai"],
       "responses": {
         "en": "😊 You're very welcome! Happy to help anytime. Need anything else? Just ask!",
         "hi": "😊 Aapka bahut bahut swagat hai! Madad karke acha laga. Kuch aur chahiye? Bas poochiye!"
@@ -257,7 +257,7 @@
   "staffRoleIds": ["1502913220392784053", "1502913221919637586"],
   "spamPrevention": {
     "cooldownSeconds": 20,
-    "maxMessagesPerMinute": 3,
+    "maxMessagesPerMinute": 300,
     "ignoreIfStaffTagged": true
   }
 }

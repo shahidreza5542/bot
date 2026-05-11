@@ -41,39 +41,55 @@ function matchQuery(message) {
   const words = msg.split(/\s+/);
   let bestMatch = null;
   let bestScore = 0;
-  const CONFIDENCE_THRESHOLD = 0.6; // 60% confidence required
+  const CONFIDENCE_THRESHOLD = 0.7; // Increased to 70% for better accuracy
   
+  // Priority order for matching
   for (const [key, data] of Object.entries(knowledgeBase)) {
     for (const pattern of data.patterns) {
       const patternLower = pattern.toLowerCase().trim();
       
-      // Direct match (highest confidence)
-      if (msg.includes(patternLower)) {
-        console.log(`[AI] Direct match: "${pattern}" -> ${key}`);
+      // Exact match (highest priority)
+      if (msg === patternLower) {
+        console.log(`[AI] EXACT match: "${pattern}" -> ${key}`);
         return key;
       }
       
-      // Word-by-word matching
-      const patternWords = patternLower.split(/\s+/);
-      let matchedCount = 0;
-      
-      for (const pw of patternWords) {
-        if (words.includes(pw) || words.some(w => w.includes(pw) && pw.length > 3)) {
-          matchedCount++;
+      // Direct inclusion match (high priority)
+      if (msg.includes(patternLower) && patternLower.length > 3) {
+        // Only match if pattern is significant (not just single common words)
+        const score = patternLower.length / msg.length;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = key;
+          console.log(`[AI] Direct inclusion: "${pattern}" -> ${key} (score: ${score.toFixed(2)})`);
         }
       }
       
-      const score = matchedCount / patternWords.length;
-      
-      if (score >= CONFIDENCE_THRESHOLD && score > bestScore) {
-        bestScore = score;
-        bestMatch = key;
+      // Word-by-word matching (lower priority, stricter)
+      const patternWords = patternLower.split(/\s+/);
+      if (patternWords.length >= 2) { // Only for multi-word patterns
+        let matchedCount = 0;
+        
+        for (const pw of patternWords) {
+          if (pw.length > 3) { // Only match significant words
+            if (words.includes(pw) || words.some(w => w === pw)) {
+              matchedCount++;
+            }
+          }
+        }
+        
+        const score = matchedCount / patternWords.length;
+        
+        if (score >= CONFIDENCE_THRESHOLD && score > bestScore) {
+          bestScore = score;
+          bestMatch = key;
+        }
       }
     }
   }
   
-  if (bestMatch) {
-    console.log(`[AI] Fuzzy match: ${bestMatch} (score: ${bestScore.toFixed(2)})`);
+  if (bestMatch && bestScore > 0.5) {
+    console.log(`[AI] Best match: ${bestMatch} (score: ${bestScore.toFixed(2)})`);
   } else if (msg.length > 3) {
     console.log(`[AI] No match found for: "${msg.substring(0, 50)}"`);
   }
