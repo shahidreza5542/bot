@@ -186,8 +186,7 @@ module.exports = {
           }
         }
 
-        const isKnown = isKnownQuery(message.content);
-        const aiResponse = await generateSupportResponse(message.content, context);
+        const { response: aiResponse, isKnown } = generateSupportResponse(message.content);
         
         // Check if this is an unknown query
         const unknownKey = `unknown-${message.channel.id}`;
@@ -195,18 +194,21 @@ module.exports = {
         const shouldTagStaff = trainData.unknownQueryTagStaff && !isKnown && (now - lastUnknownTag > 300000); // 5 min cooldown
 
         if (shouldTagStaff) {
-          // Tag staff for unknown query
-          const staffMentions = STAFF_ROLE_IDS.map(id => `<@&${id}>`).join(' ');
+          const mentions = [];
+          if (OWNER_ID) mentions.push(`<@${OWNER_ID}>`);
+          mentions.push(...STAFF_ROLE_IDS.map(id => `<@&${id}>`));
+          const staffMentions = mentions.join(' ') || 'Support team needed!';
+          
           const embed = new EmbedBuilder()
             .setTitle('🤖 Toolmetry AI Support')
             .setDescription(aiResponse)
-            .setColor(0xFFA500) // Orange for unknown queries
+            .setColor(0xFFA500)
             .setFooter({ text: 'AI Assistant • Staff has been notified' })
             .setTimestamp();
 
           await message.channel.send({ content: staffMentions, embeds: [embed] });
           unknownQueryTracker.set(unknownKey, now);
-          console.log(`[AI Debug] Staff tagged response sent to #${channelName}`);
+          console.log(`[AI] Staff tagged for unknown query in #${channelName}`);
         } else {
           // Normal response without tagging
           const embed = new EmbedBuilder()
@@ -244,7 +246,7 @@ module.exports = {
       // Roast a random inactive user
       if (inactiveUsers.length > 0) {
         const target = inactiveUsers[Math.floor(Math.random() * inactiveUsers.length)];
-        const roastText = await generateAIRoast(target.user.username);
+        const roastText = generateRoast(target.user.username);
         
         const embed = new EmbedBuilder()
           .setTitle('🔥 Inactivity Roast!')
