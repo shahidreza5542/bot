@@ -8,6 +8,18 @@ const path = require('path');
 
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 
+// Validate required environment variables
+const requiredEnvVars = ['DISCORD_TOKEN', 'MONGODB_URI'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:');
+  missingEnvVars.forEach(envVar => console.error(`   - ${envVar}`));
+  console.error('\nPlease create a .env file with the required variables.');
+  console.error('See .env.example for reference.');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -28,22 +40,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(limiter);
 
-// MongoDB Connection
+// MongoDB Connection with better error handling
 mongoose.connect(process.env.MONGODB_URI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
   bufferCommands: false,
-  maxPoolSize: 10
+  maxPoolSize: 10,
+  retryWrites: true,
+  w: 'majority'
 })
   .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('MongoDB Connection Error:', err));
+  .catch(err => {
+    console.error('MongoDB Connection Error:', err.message);
+    console.error('Bot will continue running but database features may be limited.');
+  });
 
 mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err);
+  console.error('MongoDB connection error:', err.message);
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected. Attempting to reconnect...');
+  console.warn('MongoDB disconnected. Some features may not work.');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected');
 });
 
 // Discord Bot Setup

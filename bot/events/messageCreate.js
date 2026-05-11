@@ -10,7 +10,8 @@ const trainData = require('../data/traindata.json');
 const knowledgeBase = trainData.knowledgeBase;
 
 // English only fallback
-const fallbackResponse = "I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email toolmetryai@gmail.com";
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@example.com';
+const fallbackResponse = `I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email ${SUPPORT_EMAIL}`;
 
 // Track user activity
 const userActivity = new Map();
@@ -27,7 +28,9 @@ const SPAM_CONFIG = trainData.spamPrevention || {
 };
 
 // Staff role IDs to tag when AI doesn't know the answer
-const STAFF_ROLE_IDS = trainData.staffRoleIds || [];
+const STAFF_ROLE_IDS = trainData.staffRoleIds.length > 0 
+  ? trainData.staffRoleIds 
+  : (process.env.STAFF_ROLE_IDS ? process.env.STAFF_ROLE_IDS.split(',') : []);
 const OWNER_ID = process.env.OWNER_ID || '';
 
 // Clean up old processed messages every 5 minutes

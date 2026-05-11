@@ -9,22 +9,26 @@ module.exports = {
       option
         .setName('title')
         .setDescription('Embed title')
-        .setRequired(true))
+        .setRequired(true)
+        .setMaxLength(256))
     .addStringOption(option =>
       option
         .setName('description')
         .setDescription('Embed description/message')
-        .setRequired(true))
+        .setRequired(true)
+        .setMaxLength(4096))
     .addStringOption(option =>
       option
         .setName('color')
         .setDescription('Embed color (hex code like #4F46E5)')
-        .setRequired(false))
+        .setRequired(false)
+        .setMaxLength(7))
     .addStringOption(option =>
       option
         .setName('footer')
         .setDescription('Footer text')
-        .setRequired(false))
+        .setRequired(false)
+        .setMaxLength(2048))
     .addStringOption(option =>
       option
         .setName('footer_image')
@@ -44,7 +48,8 @@ module.exports = {
       option
         .setName('author')
         .setDescription('Author name')
-        .setRequired(false))
+        .setRequired(false)
+        .setMaxLength(256))
     .addStringOption(option =>
       option
         .setName('author_image')
@@ -60,7 +65,7 @@ module.exports = {
   async execute(interaction) {
     const title = interaction.options.getString('title');
     const description = interaction.options.getString('description');
-    const colorInput = interaction.options.getString('color') || '#4F46E5'; // Indigo 600 default
+    const colorInput = interaction.options.getString('color') || '#4F46E5';
     const footer = interaction.options.getString('footer');
     const footerImage = interaction.options.getString('footer_image');
     const image = interaction.options.getString('image');
@@ -68,6 +73,11 @@ module.exports = {
     const author = interaction.options.getString('author');
     const authorImage = interaction.options.getString('author_image');
     const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
+
+    // Validate color format
+    if (colorInput && !colorInput.match(/^#[0-9A-Fa-f]{6}$/)) {
+      return interaction.reply({ content: 'Invalid color format. Use hex like #4F46E5', ephemeral: true });
+    }
 
     // Convert hex color to integer
     const color = parseInt(colorInput.replace('#', ''), 16) || 0x4F46E5;

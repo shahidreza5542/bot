@@ -39,7 +39,7 @@ module.exports = {
           .setStyle(ButtonStyle.Primary)
           .setEmoji('🎫'),
         new ButtonBuilder()
-          .setURL('https://discord.com/oauth2/authorize?client_id=1502937744601649232&permissions=8&integration_type=0&scope=bot')
+          .setURL(process.env.SUPPORT_SERVER_URL || 'https://discord.gg/yourserver')
           .setLabel('Join Support Server')
           .setStyle(ButtonStyle.Link)
           .setEmoji('🔗')
