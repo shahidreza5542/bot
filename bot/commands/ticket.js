@@ -1,8 +1,43 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ChannelType } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
 
-// In-memory ticket storage (Discord-only, no database)
-const tickets = new Map();
-let ticketCounter = 0;
+// Persistent ticket storage
+const TICKETS_FILE = path.join(__dirname, '../data/tickets.json');
+
+// Load tickets from file
+function loadTickets() {
+  try {
+    if (fs.existsSync(TICKETS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(TICKETS_FILE, 'utf8'));
+      const ticketsMap = new Map();
+      let maxCounter = 0;
+      for (const [key, value] of Object.entries(data.tickets || {})) {
+        ticketsMap.set(key, value);
+        const num = parseInt(key.split('-')[1]);
+        if (num > maxCounter) maxCounter = num;
+      }
+      return { tickets: ticketsMap, counter: maxCounter };
+    }
+  } catch (err) {
+    console.error('Error loading tickets:', err);
+  }
+  return { tickets: new Map(), counter: 0 };
+}
+
+// Save tickets to file
+function saveTickets() {
+  try {
+    const ticketsObj = Object.fromEntries(tickets);
+    fs.writeFileSync(TICKETS_FILE, JSON.stringify({ tickets: ticketsObj, lastUpdated: new Date().toISOString() }, null, 2));
+  } catch (err) {
+    console.error('Error saving tickets:', err);
+  }
+}
+
+const { tickets: loadedTickets, counter: loadedCounter } = loadTickets();
+const tickets = loadedTickets;
+let ticketCounter = loadedCounter;
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -69,6 +104,9 @@ module.exports = {
         claimedBy: null,
         createdAt: new Date()
       });
+      
+      // Save to file
+      saveTickets();
 
       // Send initial message
       const embed = new EmbedBuilder()
@@ -121,3 +159,4 @@ module.exports = {
 
 // Export tickets Map for use in interaction handler
 module.exports.tickets = tickets;
+module.exports.saveTickets = saveTickets;

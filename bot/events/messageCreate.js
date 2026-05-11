@@ -55,31 +55,52 @@ function detectLanguage(message) {
   return hasHindi ? 'hi' : 'en';
 }
 
-// Match query to knowledge base (flexible matching)
+// Match query to knowledge base (flexible matching with confidence)
 function matchQuery(message) {
-  const msg = message.toLowerCase();
+  const msg = message.toLowerCase().trim();
   const words = msg.split(/\s+/);
+  let bestMatch = null;
+  let bestScore = 0;
+  const CONFIDENCE_THRESHOLD = 0.7; // 70% confidence required
   
   for (const [key, data] of Object.entries(knowledgeBase)) {
     for (const pattern of data.patterns) {
-      const patternLower = pattern.toLowerCase();
+      const patternLower = pattern.toLowerCase().trim();
       
-      // Direct match
+      // Direct match (highest confidence)
       if (msg.includes(patternLower)) {
+        console.log(`[AI Debug] Direct match: "${pattern}" -> ${key}`);
         return key;
       }
       
-      // Word-by-word matching (handles "my password no reset" -> "password reset")
+      // Word-by-word matching
       const patternWords = patternLower.split(/\s+/);
-      const matchedWords = patternWords.filter(pw => words.some(w => w.includes(pw) || pw.includes(w)));
+      let matchedCount = 0;
       
-      // If at least 60% of pattern words match, consider it a match
-      if (matchedWords.length >= Math.ceil(patternWords.length * 0.6)) {
-        return key;
+      for (const pw of patternWords) {
+        // Check for exact word match or substring match
+        if (words.includes(pw) || words.some(w => w.includes(pw) && pw.length > 3)) {
+          matchedCount++;
+        }
+      }
+      
+      const score = matchedCount / patternWords.length;
+      
+      // Track best match if above threshold
+      if (score >= CONFIDENCE_THRESHOLD && score > bestScore) {
+        bestScore = score;
+        bestMatch = key;
       }
     }
   }
-  return null;
+  
+  if (bestMatch) {
+    console.log(`[AI Debug] Fuzzy match: ${bestMatch} (score: ${bestScore.toFixed(2)})`);
+  } else if (msg.length > 3) {
+    console.log(`[AI Debug] No match found for: "${msg.substring(0, 50)}"`);
+  }
+  
+  return bestMatch;
 }
 
 // Get AI response using Gemini
@@ -149,18 +170,23 @@ async function generateSupportResponse(userMessage, channelType = 'support') {
   
   if (matchedKey) {
     const lang = detectLanguage(userMessage);
-    return knowledgeBase[matchedKey].responses[lang] || knowledgeBase[matchedKey].responses.en;
+    const response = knowledgeBase[matchedKey].responses[lang] || knowledgeBase[matchedKey].responses.en;
+    console.log(`[AI Debug] Knowledge base response [${matchedKey}/${lang}]: "${response.substring(0, 50)}..."`);
+    return response;
   }
   
   // If no match, try Gemini AI
   const geminiResponse = await getGeminiResponse(userMessage, channelType);
   if (geminiResponse) {
+    console.log(`[AI Debug] Gemini response: "${geminiResponse.substring(0, 50)}..."`);
     return geminiResponse;
   }
   
   // Ultimate fallback
   const lang = detectLanguage(userMessage);
-  return fallbackResponses[lang] || fallbackResponses.en;
+  const fallback = fallbackResponses[lang] || fallbackResponses.en;
+  console.log(`[AI Debug] Fallback response [${lang}]: "${fallback.substring(0, 50)}..."`);
+  return fallback;
 }
 
 // Check if user is spamming
@@ -181,17 +207,9 @@ function isUserSpamming(userId, channelId) {
   return userData.count > SPAM_CONFIG.maxMessagesPerMinute;
 }
 
-// Check if query is known
+// Check if query is known (uses same flexible matching as matchQuery)
 function isKnownQuery(message) {
-  const msg = message.toLowerCase();
-  for (const [key, data] of Object.entries(knowledgeBase)) {
-    for (const pattern of data.patterns) {
-      if (msg.includes(pattern.toLowerCase())) {
-        return true;
-      }
-    }
-  }
-  return false;
+  return matchQuery(message) !== null;
 }
 
 module.exports = {
@@ -212,8 +230,11 @@ module.exports = {
     const isAISupportChannel = channelName === 'ai-support' || channelName.includes('ai-support');
     
     if (isTicketChannel || isAISupportChannel) {
+      console.log(`[AI Debug] Processing message from ${message.author.tag} in #${channelName}: "${message.content.substring(0, 80)}"`);
+      
       // Check if we already processed this message (prevent duplicates)
       if (processedMessages.has(message.id)) {
+        console.log(`[AI Debug] Duplicate message, skipping`);
         return;
       }
       processedMessages.add(message.id);
@@ -263,6 +284,7 @@ module.exports = {
 
           await message.channel.send({ content: staffMentions, embeds: [embed] });
           unknownQueryTracker.set(unknownKey, now);
+          console.log(`[AI Debug] Staff tagged response sent to #${channelName}`);
         } else {
           // Normal response without tagging
           const embed = new EmbedBuilder()
@@ -273,6 +295,7 @@ module.exports = {
             .setTimestamp();
 
           await message.channel.send({ embeds: [embed] });
+          console.log(`[AI Debug] Response sent to #${channelName} (known: ${isKnown})`);
         }
         
         aiResponseCooldown.set(cooldownKey, now);

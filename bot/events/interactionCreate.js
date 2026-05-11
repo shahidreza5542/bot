@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionsBitField } = require('discord.js');
-const { tickets } = require('../commands/ticket');
+const { tickets, saveTickets } = require('../commands/ticket');
 
 // In-memory warnings storage
 const warnings = new Map();
@@ -92,6 +92,9 @@ async function handleButtonInteraction(interaction) {
         claimedBy: null,
         createdAt: new Date()
       });
+      
+      // Save to file
+      saveTickets();
 
       const embed = new EmbedBuilder()
         .setTitle(`🎫 Ticket #${ticketNumber}`)
@@ -151,6 +154,7 @@ async function handleButtonInteraction(interaction) {
         }
 
         ticket.claimedBy = user.id;
+        saveTickets(); // Persist changes
 
         const messages = await channel.messages.fetch({ limit: 10 });
         const panelMessage = messages.find(m => m.embeds?.[0]?.title?.includes('Ticket #'));
@@ -180,6 +184,7 @@ async function handleButtonInteraction(interaction) {
         }
 
         ticket.status = 'closed';
+        saveTickets(); // Persist changes
 
         const messages = await channel.messages.fetch({ limit: 10 });
         const panelMessage = messages.find(m => m.embeds?.[0]?.title?.includes('Ticket #'));
