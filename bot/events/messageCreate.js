@@ -260,14 +260,22 @@ module.exports = {
       }
     }
 
-    // Leveling system (Discord-only, no DB)
+    // Leveling system - local JSON storage
     if (message.guild) {
       const key = `xp-${message.guild.id}-${userId}`;
-      const currentXP = global.userXP?.get(key) || 0;
+      const currentData = levelStorage.get(key);
       const gainedXP = Math.floor(Math.random() * 10) + 5;
+      const xpNeeded = 5 * Math.pow(currentData.level, 2) + 50 * currentData.level + 100;
+      let newLevel = currentData.level;
+      let newXP = currentData.xp + gainedXP;
+      let newMessages = (currentData.messages || 0) + 1;
       
-      if (!global.userXP) global.userXP = new Map();
-      global.userXP.set(key, currentXP + gainedXP);
+      if (newXP >= xpNeeded) {
+        newLevel++;
+        newXP = newXP - xpNeeded;
+      }
+      
+      levelStorage.set(key, { level: newLevel, xp: newXP, messages: newMessages });
     }
   }
 };
