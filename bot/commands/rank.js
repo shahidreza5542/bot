@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const Level = require('../../models/Level');
+const { levelStorage } = require('../utils/localStorage');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,36 +13,23 @@ module.exports = {
 
   async execute(interaction) {
     const targetUser = interaction.options.getUser('user') || interaction.user;
+    const guildId = interaction.guild.id;
     
     try {
-      let levelData = await Level.findOne({
-        guildId: interaction.guild.id,
-        userId: targetUser.id
-      });
+      const key = `xp-${guildId}-${targetUser.id}`;
+      let levelData = levelStorage.get(key);
 
-      if (!levelData) {
-        levelData = {
-          level: 1,
-          xp: 0,
-          messages: 0
-        };
-      }
-
-      // Calculate rank
-      const higherLevels = await Level.countDocuments({
-        guildId: interaction.guild.id,
-        xp: { $gt: levelData.xp }
-      });
-
-      const rank = higherLevels + 1;
+      // Calculate rank by comparing XP with other users
+      const guildLevels = levelStorage.getGuildLevels(guildId);
+      const rank = guildLevels.findIndex(u => u.userId === targetUser.id) + 1 || guildLevels.length + 1;
 
       // Calculate XP needed for next level
       const currentLevelXp = 5 * Math.pow(levelData.level, 2) + 50 * levelData.level + 100;
       const nextLevelXp = 5 * Math.pow(levelData.level + 1, 2) + 50 * (levelData.level + 1) + 100;
       const xpNeeded = nextLevelXp - levelData.xp;
-      const xpProgress = levelData.xp - currentLevelXp;
+      const xpProgress = levelData.xp;
       const xpTotalNeeded = nextLevelXp - currentLevelXp;
-      const progressPercent = Math.round((xpProgress / xpTotalNeeded) * 100);
+      const progressPercent = Math.min(Math.round((xpProgress / xpTotalNeeded) * 100), 100);
 
       // Create progress bar
       const progressBarLength = 20;
@@ -56,9 +43,9 @@ module.exports = {
           { name: 'Rank', value: `#${rank}`, inline: true },
           { name: 'Level', value: levelData.level.toString(), inline: true },
           { name: 'XP', value: levelData.xp.toString(), inline: true },
-          { name: 'Messages', value: levelData.messages.toString(), inline: true },
+          { name: 'Messages', value: (levelData.messages || 0).toString(), inline: true },
           { name: 'Progress', value: `${progressBar} ${progressPercent}%`, inline: false },
-          { name: 'XP to Next Level', value: xpNeeded.toString(), inline: true }
+          { name: 'XP to Next Level', value: Math.max(0, xpNeeded).toString(), inline: true }
         )
         .setColor(0xFFD700)
         .setTimestamp();

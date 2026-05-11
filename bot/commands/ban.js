@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
-const Ban = require('../../models/Ban');
+const { banStorage } = require('../utils/localStorage');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -61,17 +61,16 @@ module.exports = {
         reason: `${reason} | By: ${interaction.user.tag}`
       });
 
-      const ban = new Ban({
+      // Store ban in local storage
+      banStorage.add({
         guildId: interaction.guild.id,
         userId: user.id,
         username: user.username,
         moderatorId: interaction.user.id,
         reason,
         type: duration > 0 ? 'tempban' : 'ban',
-        expiresAt: duration > 0 ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000) : null
+        expiresAt: duration > 0 ? new Date(Date.now() + duration * 24 * 60 * 60 * 1000).toISOString() : null
       });
-
-      await ban.save();
 
       const embed = new EmbedBuilder()
         .setTitle('User Banned')
@@ -86,14 +85,6 @@ module.exports = {
 
       await interaction.reply({ embeds: [embed] });
 
-      // Log to mod channel
-      const guildSettings = await Guild.findOne({ guildId: interaction.guild.id });
-      if (guildSettings?.moderation?.logChannelId) {
-        const logChannel = interaction.guild.channels.cache.get(guildSettings.moderation.logChannelId);
-        if (logChannel) {
-          await logChannel.send({ embeds: [embed] });
-        }
-      }
     } catch (err) {
       console.error('Error banning user:', err);
       await interaction.reply({

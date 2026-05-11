@@ -47,7 +47,7 @@ async function handleButtonInteraction(interaction) {
   try {
     // Ticket Create Button from panel
     if (customId === 'ticket_create') {
-      await interaction.deferReply({ flags: 64 });
+      await interaction.deferReply({ ephemeral: true });
 
       // Check if user already has an open ticket
       for (const [id, ticket] of tickets) {
@@ -142,7 +142,7 @@ async function handleButtonInteraction(interaction) {
       const ticket = tickets.get(ticketId);
 
       if (action === 'claim') {
-        await interaction.deferReply({ flags: 64 });
+        await interaction.deferReply({ ephemeral: true });
         
         if (!ticket) {
           return await interaction.editReply({ content: '❌ Ticket not found.' });

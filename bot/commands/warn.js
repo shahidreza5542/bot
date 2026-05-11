@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
-
-// In-memory warnings storage (Discord-only)
-const warnings = new Map();
+const { warningStorage } = require('../utils/localStorage');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,24 +22,14 @@ module.exports = {
     const reason = interaction.options.getString('reason') || 'No reason provided';
     const guildId = interaction.guild.id;
 
-    // Get or create warnings array for this user
-    const userKey = `${guildId}-${targetUser.id}`;
-    if (!warnings.has(userKey)) {
-      warnings.set(userKey, []);
-    }
-
-    const userWarnings = warnings.get(userKey);
-    const warnId = userWarnings.length + 1;
-
+    // Add warning to local storage
     const warning = {
-      id: warnId,
       reason,
       moderator: interaction.user.tag,
-      moderatorId: interaction.user.id,
-      timestamp: new Date()
+      moderatorId: interaction.user.id
     };
 
-    userWarnings.push(warning);
+    const userWarnings = warningStorage.add(guildId, targetUser.id, warning);
 
     // Send DM to user
     try {
@@ -68,7 +56,7 @@ module.exports = {
       .addFields(
         { name: 'Reason', value: reason, inline: true },
         { name: 'Warned By', value: interaction.user.tag, inline: true },
-        { name: 'Total Warnings', value: `${userWarnings.length}`, inline: true }
+        { name: 'Total Warnings', value: `${userWarnings.filter(w => w.active).length}`, inline: true }
       )
       .setColor(0x4F46E5) // Indigo 600
       .setThumbnail(targetUser.displayAvatarURL())
@@ -78,4 +66,3 @@ module.exports = {
   }
 };
 
-module.exports.warnings = warnings;
