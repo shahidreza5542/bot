@@ -45,14 +45,22 @@ module.exports = {
           .setEmoji('🔗')
       );
 
-    await targetChannel.send({
-      embeds: [embed],
-      components: [row]
-    });
+    try {
+      await targetChannel.send({
+        embeds: [embed],
+        components: [row]
+      });
 
-    await interaction.reply({
-      content: `✅ Ticket panel sent to ${targetChannel}`,
-      ephemeral: true
-    });
+      await interaction.reply({
+        content: `✅ Ticket panel sent to ${targetChannel}`,
+        ephemeral: true
+      });
+    } catch (err) {
+      console.error('[Ticket-Panel] Error sending panel:', err.message);
+      await interaction.reply({
+        content: `❌ Failed to send panel to ${targetChannel}. Check bot permissions.`,
+        ephemeral: true
+      });
+    }
   }
 };
