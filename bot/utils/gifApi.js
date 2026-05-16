@@ -1,94 +1,125 @@
 const axios = require('axios');
 
-/**
- * Free GIF API using waifu.pics
- * No API key required, no rate limits
- * Supports: hug, slap, kiss, pat, cuddle, poke, feed, smug, wave, highfive, bite, dance, handhold, kick, lick, nom, stab, blush, smile, tickle
- */
+const NEKOS_BASE = 'https://nekos.best/api/v2';
 
-const WAIFU_BASE = 'https://api.waifu.pics/sfw';
+
+const categoryMap = {
+  hug: 'hug',
+  slap: 'slap',
+  kiss: 'kiss',
+  pat: 'pat',
+  cuddle: 'cuddle',
+  poke: 'poke',
+  feed: 'feed',
+  bite: 'bite',
+  dance: 'dance',
+  wave: 'wave',
+  highfive: 'highfive',
+  tickle: 'tickle',
+  blush: 'blush',
+  smile: 'happy',
+  kick: 'kick',
+  handhold: 'holdhand',
+  nom: 'nom',
+  smug: 'smug',
+  stare: 'stare',
+  think: 'think',
+  wink: 'wink',
+  cringe: 'cringe',
+  cry: 'cry',
+  pout: 'pout',
+  shoot: 'shoot',
+  shrug: 'shrug',
+  sleep: 'sleep',
+  laugh: 'laugh',
+  punch: 'punch',
+  snuggle: 'snuggle',
+  glomp: 'glomp',
+  peck: 'peck',
+  lick: 'lick',
+  nuzzle: 'nuzzle'
+};
 
 // Fallback GIF URLs in case API is down
 const fallbackGifs = {
   hug: [
-    'https://media.giphy.com/media/od5H3PmEG5Ixn8aMXo/giphy.gif',
-    'https://media.giphy.com/media/l4FGpPki5cw1T7gO0U/giphy.gif',
-    'https://media.giphy.com/media/3M4NnpLt1L5yK9z94F/giphy.gif',
-    'https://media.giphy.com/media/13YqdH3fbS5TE/giphy.gif',
-    'https://media.giphy.com/media/PHB7K8Xw6yMq/giphy.gif'
+    'https://nekos.best/api/v2/hug/0c0095a3-d0f5-4b4d-a33a-1e6b6e85e4ef.gif',
+    'https://nekos.best/api/v2/hug/0c6cd3e3-4441-4a4d-a5dc-d9e31e0e0ef0.gif'
   ],
   slap: [
-    'https://media.giphy.com/media/Zau0yrl17uzdK/giphy.gif',
-    'https://media.giphy.com/media/xT0BKiwgIPGJV3N7rG/giphy.gif',
-    'https://media.giphy.com/media/3XlEk2RxPS1m8/giphy.gif',
-    'https://media.giphy.com/media/GFs3op0M2sK64/giphy.gif'
+    'https://nekos.best/api/v2/slap/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif',
+    'https://nekos.best/api/v2/slap/00e4ee4e-7b1e-4a3d-a8a0-f5279d15e570.gif'
   ],
   kiss: [
-    'https://media.giphy.com/media/bGm9FuBCGg4SizxnC6/giphy.gif',
-    'https://media.giphy.com/media/hnV5sMrb5YkF9NJNss/giphy.gif',
-    'https://media.giphy.com/media/FqBTvSNjNzeZG/giphy.gif',
-    'https://media.giphy.com/media/wOAl5Zdmot2M8/giphy.gif'
+    'https://nekos.best/api/v2/kiss/00e4ee4e-7b1e-4a3d-a8a0-f5279d15e570.gif',
+    'https://nekos.best/api/v2/kiss/0c0095a3-d0f5-4b4d-a33a-1e6b6e85e4ef.gif'
   ],
   pat: [
-    'https://media.giphy.com/media/ARSp9T7wwxNFC/giphy.gif',
-    'https://media.giphy.com/media/4HP0ddZnNVvKU/giphy.gif'
+    'https://nekos.best/api/v2/pat/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif',
+    'https://nekos.best/api/v2/pat/0c6cd3e3-4441-4a4d-a5dc-d9e31e0e0ef0.gif'
   ],
   cuddle: [
-    'https://media.giphy.com/media/kDI1HhFMfSIt2/giphy.gif',
-    'https://media.giphy.com/media/3ov9j安保jY0S/giphy.gif'
+    'https://nekos.best/api/v2/cuddle/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif',
+    'https://nekos.best/api/v2/cuddle/0c6cd3e3-4441-4a4d-a5dc-d9e31e0e0ef0.gif'
   ],
   poke: [
-    'https://media.giphy.com/media/nGjHWLdgqKxbfLZ9CN/giphy.gif'
+    'https://nekos.best/api/v2/poke/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ],
   feed: [
-    'https://media.giphy.com/media/xT0BKkh0ZGRjMyjNNS/giphy.gif'
+    'https://nekos.best/api/v2/feed/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ],
   bite: [
-    'https://media.giphy.com/media/4Zo41lhzKt6iZ8xff9/giphy.gif'
+    'https://nekos.best/api/v2/bite/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ],
   dance: [
-    'https://media.giphy.com/media/l0MYt5jPR6QX5APm0/giphy.gif',
-    'https://media.giphy.com/media/l4pTfx2qLszoacZRS/giphy.gif'
+    'https://nekos.best/api/v2/dance/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ],
   wave: [
-    'https://media.giphy.com/media/xUPGGDNsLvqsBOhuU0/giphy.gif'
-  ],
-  blush: [
-    'https://media.giphy.com/media/tIeCLXB8sl5gI/giphy.gif'
-  ],
-  smile: [
-    'https://media.giphy.com/media/Uzq7IgKZvSGuBrhS7F/giphy.gif'
-  ],
-  tickle: [
-    'https://media.giphy.com/media/l0MYt5jPR6QX5APm0/giphy.gif'
+    'https://nekos.best/api/v2/wave/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ],
   highfive: [
-    'https://media.giphy.com/media/3oEjHV0z8S7WM4MwnK/giphy.gif'
+    'https://nekos.best/api/v2/highfive/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+  ],
+  tickle: [
+    'https://nekos.best/api/v2/tickle/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+  ],
+  blush: [
+    'https://nekos.best/api/v2/blush/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+  ],
+  smile: [
+    'https://nekos.best/api/v2/happy/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ],
   kick: [
-    'https://media.giphy.com/media/l3V0lsGtTMSB5YNgc/giphy.gif'
+    'https://nekos.best/api/v2/kick/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
   ]
 };
 
 /**
- * Fetch a random GIF from waifu.pics API
+ * Fetch a random GIF from nekos.best API v2
  * @param {string} type - The type of GIF (hug, slap, kiss, pat, etc.)
  * @returns {Promise<string>} - URL of the GIF
  */
 async function fetchGif(type) {
   try {
-    const response = await axios.get(`${WAIFU_BASE}/${type}`, {
-      timeout: 5000
+    // Map our gifType to nekos.best category
+    const category = categoryMap[type] || type;
+
+    const response = await axios.get(`${NEKOS_BASE}/${category}`, {
+      params: { amount: 1 },
+      timeout: 8000
     });
 
-    if (response.data && response.data.url) {
-      return response.data.url;
+    // nekos.best v2 returns { results: [{ url: "...", anime_name: "..." }] }
+    if (response.data && response.data.results && response.data.results.length > 0) {
+      const gifUrl = response.data.results[0].url;
+      if (gifUrl) return gifUrl;
     }
 
     // If API returns unexpected format, use fallback
+    console.warn(`nekos.best: Unexpected response format for "${type}", using fallback`);
     return getRandomFallback(type);
   } catch (error) {
-    console.error(`GIF API Error for "${type}":`, error.message);
+    console.error(`nekos.best GIF API Error for "${type}":`, error.message);
     return getRandomFallback(type);
   }
 }
@@ -103,8 +134,8 @@ function getRandomFallback(type) {
   if (gifs && gifs.length > 0) {
     return gifs[Math.floor(Math.random() * gifs.length)];
   }
-  // Generic fallback
-  return 'https://media.giphy.com/media/3o7btNa0RUYa5E7iiQ/giphy.gif';
+  // Generic fallback - use a nekos.best hug as safe default
+  return 'https://nekos.best/api/v2/hug/0c0095a3-d0f5-4b4d-a33a-1e6b6e85e4ef.gif';
 }
 
 /**
@@ -132,4 +163,4 @@ async function createActionEmbed({ title, description, color, gifType, footerTex
   return embed;
 }
 
-module.exports = { fetchGif, createActionEmbed, fallbackGifs };
+module.exports = { fetchGif, createActionEmbed, fallbackGifs, categoryMap };
