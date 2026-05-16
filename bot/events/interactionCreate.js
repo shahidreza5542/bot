@@ -21,7 +21,7 @@ module.exports = {
       await command.execute(interaction);
     } catch (error) {
       console.error(`Error executing ${interaction.commandName}:`, error);
-      
+
       const errorMsg = {
         content: 'There was an error while executing this command!',
         ephemeral: true
@@ -47,19 +47,17 @@ async function handleButton(interaction) {
     try {
       await interaction.deferReply({ ephemeral: true });
 
-      // check if user already has open ticket
       for (const [id, ticket] of tickets) {
         if (ticket.userId === user.id && ticket.guildId === guild.id && ticket.status === 'open') {
           const existingChannel = guild.channels.cache.get(ticket.channelId);
           if (existingChannel) {
-            return await interaction.editReply({ 
-              content: `You already have an open ticket: ${existingChannel}` 
+            return await interaction.editReply({
+              content: `You already have an open ticket: ${existingChannel}`
             });
           }
         }
       }
 
-      // get ticket number
       let maxNum = 0;
       for (const [id, ticket] of tickets) {
         const num = parseInt(ticket.ticketId.split('-')[1]);
@@ -68,7 +66,6 @@ async function handleButton(interaction) {
       const ticketNumber = maxNum + 1;
       const channelName = `ticket-${ticketNumber.toString().padStart(4, '0')}`;
 
-      // create channel
       const ticketChannel = await guild.channels.create({
         name: channelName,
         type: ChannelType.GuildText,
@@ -91,17 +88,16 @@ async function handleButton(interaction) {
         claimedBy: null,
         createdAt: new Date()
       });
-      
+
       saveTickets();
 
-      // send embed with buttons
       const embed = new EmbedBuilder()
         .setTitle(`Ticket #${ticketNumber}`)
         .setDescription(
-          `Welcome to Toolmetry Support!\n\n` +
+          `Welcome to Support!\n\n` +
           `Hello ${user}, our support team will help you soon.\n\n` +
           `User: ${user.tag}\n` +
-          `Created: <t:${Math.floor(Date.now()/1000)}:R>`
+          `Created: <t:${Math.floor(Date.now() / 1000)}:R>`
         )
         .setColor(0x4F46E5)
         .setThumbnail(user.displayAvatarURL())
@@ -143,7 +139,7 @@ async function handleButton(interaction) {
     const parts = customId.split('_');
     const action = parts[1];
     const ticketId = parts.slice(2).join('_');
-    
+
     const ticket = tickets.get(ticketId);
 
     if (!ticket) {
@@ -155,7 +151,6 @@ async function handleButton(interaction) {
       try {
         await interaction.deferReply({ ephemeral: true });
 
-        // security check - only staff
         if (!user.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
           return await interaction.editReply({ content: 'Only staff can claim tickets' });
         }
@@ -170,7 +165,7 @@ async function handleButton(interaction) {
 
         const messages = await channel.messages.fetch({ limit: 10 });
         const panelMessage = messages.find(m => m.embeds?.[0]?.title?.includes('Ticket #'));
-        
+
         if (panelMessage && panelMessage.embeds[0]) {
           const oldEmbed = panelMessage.embeds[0];
           const updatedEmbed = new EmbedBuilder()
@@ -180,7 +175,7 @@ async function handleButton(interaction) {
             .setThumbnail(oldEmbed.thumbnail?.url || null)
             .addFields({ name: 'Claimed By', value: `<@${user.id}>`, inline: true })
             .setFooter({ text: 'Ticket Claimed' });
-          
+
           await panelMessage.edit({ embeds: [updatedEmbed] });
         }
 
@@ -197,7 +192,6 @@ async function handleButton(interaction) {
       try {
         await interaction.deferReply();
 
-        // security check - only staff or ticket owner
         const member = await guild.members.fetch(user.id).catch(() => null);
         const isStaff = member?.permissions.has(PermissionsBitField.Flags.ManageMessages);
         const isOwner = ticket.userId === user.id;
@@ -211,7 +205,7 @@ async function handleButton(interaction) {
 
         const messages = await channel.messages.fetch({ limit: 10 });
         const panelMessage = messages.find(m => m.embeds?.[0]?.title?.includes('Ticket #'));
-        
+
         if (panelMessage && panelMessage.embeds[0]) {
           const oldEmbed = panelMessage.embeds[0];
           const closedEmbed = new EmbedBuilder()
@@ -221,15 +215,14 @@ async function handleButton(interaction) {
             .setThumbnail(oldEmbed.thumbnail?.url || null)
             .addFields({ name: 'Closed By', value: `<@${user.id}>`, inline: true })
             .setFooter({ text: 'Ticket Closed' });
-          
+
           await panelMessage.edit({ embeds: [closedEmbed], components: [] });
         }
 
-        await channel.send({ 
-          content: `Ticket closed by ${user.tag}\nChannel will be deleted in 5 minutes` 
+        await channel.send({
+          content: `Ticket closed by ${user.tag}\nChannel will be deleted in 5 minutes`
         });
 
-        // delete after 5 min
         setTimeout(async () => {
           try {
             await channel.delete('Ticket closed');
@@ -252,14 +245,13 @@ async function handleButton(interaction) {
       try {
         await interaction.deferReply();
 
-        // security check - only staff
         const member = await guild.members.fetch(user.id).catch(() => null);
         if (!member?.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
           return await interaction.editReply({ content: 'Only staff can delete tickets' });
         }
-        
+
         await interaction.editReply({ content: 'Deleting ticket...' });
-        
+
         setTimeout(async () => {
           try {
             await channel.delete('Ticket deleted');

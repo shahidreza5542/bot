@@ -5,7 +5,7 @@ module.exports = {
   name: 'guildMemberAdd',
   async execute(member) {
     const settings = welcomeSettings.get(member.guild.id);
-    
+
     if (!settings || !settings.enabled) return;
 
     const channel = member.guild.channels.cache.get(settings.channelId);

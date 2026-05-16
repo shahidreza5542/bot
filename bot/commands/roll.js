@@ -35,30 +35,23 @@ module.exports = {
     const min = interaction.options.getInteger('min');
     const max = interaction.options.getInteger('max');
 
-    // Range mode
     if (min !== null && max !== null) {
       if (min >= max) {
-        return interaction.reply({
-          content: 'Minimum must be less than maximum.',
-          ephemeral: true
-        });
+        return interaction.reply({ content: 'Minimum must be less than maximum.', ephemeral: true });
       }
 
       const result = Math.floor(Math.random() * (max - min + 1)) + min;
 
       const embed = new EmbedBuilder()
-        .setTitle('Random Number')
+        .setTitle('🎲 Random Number')
         .setDescription(`**${result}**`)
-        .addFields(
-          { name: 'Range', value: `${min} - ${max}`, inline: true }
-        )
+        .addFields({ name: 'Range', value: `${min} - ${max}`, inline: true })
         .setColor(0x00ff00)
         .setTimestamp();
 
       return interaction.reply({ embeds: [embed] });
     }
 
-    // Dice mode
     const results = [];
     let total = 0;
 
@@ -69,7 +62,7 @@ module.exports = {
     }
 
     const embed = new EmbedBuilder()
-      .setTitle(`${dice}d${sides} Roll`)
+      .setTitle(`🎲 ${dice}d${sides} Roll`)
       .setColor(0x00ff00)
       .setTimestamp();
 
@@ -84,7 +77,6 @@ module.exports = {
       );
     }
 
-    // Add special messages for certain rolls
     if (dice === 1) {
       if (results[0] === sides) {
         embed.setFooter({ text: 'Critical hit! Maximum roll!' });

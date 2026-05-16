@@ -24,7 +24,6 @@ module.exports = {
         { name: 'Bot', value: targetUser.bot ? 'Yes' : 'No', inline: true },
         { name: 'Created', value: `<t:${Math.floor(targetUser.createdTimestamp / 1000)}:R>`, inline: true }
       )
-      .setFooter({ text: 'Toolmetry AI' })
       .setTimestamp();
 
     if (member) {

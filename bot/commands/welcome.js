@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ChannelType } = require('discord.js');
 
-// In-memory welcome settings (Discord-only)
+// In-memory welcome settings
 const welcomeSettings = new Map();
 
 module.exports = {

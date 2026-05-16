@@ -34,7 +34,7 @@ module.exports = {
   async execute(interaction) {
     const question = interaction.options.getString('question');
     const options = [];
-    
+
     for (let i = 1; i <= 4; i++) {
       const option = interaction.options.getString(`option${i}`);
       if (option) options.push(option);
@@ -54,7 +54,7 @@ module.exports = {
       .setTimestamp();
 
     const pollMessage = await interaction.reply({ embeds: [embed], fetchReply: true });
-    
+
     for (let i = 0; i < options.length; i++) {
       await pollMessage.react(emojis[i]);
     }

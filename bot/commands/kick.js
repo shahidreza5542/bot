@@ -23,29 +23,19 @@ module.exports = {
     const member = await interaction.guild.members.fetch(user.id).catch(() => null);
 
     if (!member) {
-      return interaction.reply({
-        content: 'User not found in this server.',
-        ephemeral: true
-      });
+      return interaction.reply({ content: 'User not found in this server.', ephemeral: true });
     }
 
     if (member.roles.highest.position >= interaction.member.roles.highest.position) {
-      return interaction.reply({
-        content: 'You cannot kick this user.',
-        ephemeral: true
-      });
+      return interaction.reply({ content: 'You cannot kick this user.', ephemeral: true });
     }
 
     if (!member.kickable) {
-      return interaction.reply({
-        content: 'I cannot kick this user.',
-        ephemeral: true
-      });
+      return interaction.reply({ content: 'I cannot kick this user.', ephemeral: true });
     }
 
     try {
       await member.kick(`${reason} | By: ${interaction.user.tag}`);
-
 
       const embed = new EmbedBuilder()
         .setTitle('👢 User Kicked')
@@ -54,17 +44,14 @@ module.exports = {
           { name: 'Reason', value: reason },
           { name: 'Moderator', value: interaction.user.tag }
         )
-        .setColor(0x4F46E5) // Indigo 600
+        .setColor(0x4F46E5)
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
 
     } catch (err) {
       console.error('Error kicking user:', err);
-      await interaction.reply({
-        content: 'Failed to kick user.',
-        ephemeral: true
-      });
+      await interaction.reply({ content: 'Failed to kick user.', ephemeral: true });
     }
   }
 };

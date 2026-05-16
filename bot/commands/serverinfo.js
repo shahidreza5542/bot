@@ -21,7 +21,7 @@ module.exports = {
         { name: 'Roles', value: `${guild.roles.cache.size}`, inline: true },
         { name: 'Boost Level', value: `Level ${guild.premiumTier}`, inline: true }
       )
-      .setFooter({ text: `ID: ${guild.id} • Toolmetry AI` })
+      .setFooter({ text: `ID: ${guild.id}` })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });

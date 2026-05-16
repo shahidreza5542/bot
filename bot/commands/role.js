@@ -9,18 +9,14 @@ module.exports = {
       subcommand
         .setName('add')
         .setDescription('Add a role to a user')
-        .addUserOption(option =>
-          option.setName('user').setDescription('User').setRequired(true))
-        .addRoleOption(option =>
-          option.setName('role').setDescription('Role to add').setRequired(true)))
+        .addUserOption(option => option.setName('user').setDescription('User').setRequired(true))
+        .addRoleOption(option => option.setName('role').setDescription('Role to add').setRequired(true)))
     .addSubcommand(subcommand =>
       subcommand
         .setName('remove')
         .setDescription('Remove a role from a user')
-        .addUserOption(option =>
-          option.setName('user').setDescription('User').setRequired(true))
-        .addRoleOption(option =>
-          option.setName('role').setDescription('Role to remove').setRequired(true)))
+        .addUserOption(option => option.setName('user').setDescription('User').setRequired(true))
+        .addRoleOption(option => option.setName('role').setDescription('Role to remove').setRequired(true)))
     .addSubcommand(subcommand =>
       subcommand
         .setName('all')
@@ -34,8 +30,7 @@ module.exports = {
               { name: 'Add', value: 'add' },
               { name: 'Remove', value: 'remove' }
             ))
-        .addRoleOption(option =>
-          option.setName('role').setDescription('Role').setRequired(true))),
+        .addRoleOption(option => option.setName('role').setDescription('Role').setRequired(true))),
 
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
@@ -46,23 +41,16 @@ module.exports = {
       const member = await interaction.guild.members.fetch(user.id);
 
       if (member.roles.cache.has(role.id)) {
-        return interaction.reply({
-          content: `${user.tag} already has this role.`,
-          ephemeral: true
-        });
+        return interaction.reply({ content: `${user.tag} already has this role.`, ephemeral: true });
       }
-
       if (role.position >= interaction.member.roles.highest.position) {
-        return interaction.reply({
-          content: 'You cannot assign this role.',
-          ephemeral: true
-        });
+        return interaction.reply({ content: 'You cannot assign this role.', ephemeral: true });
       }
 
       await member.roles.add(role);
 
       const embed = new EmbedBuilder()
-        .setTitle('Role Added')
+        .setTitle('✅ Role Added')
         .setDescription(`Added ${role.name} to ${user.tag}`)
         .setColor(role.color || 0x00ff00)
         .setTimestamp();
@@ -75,23 +63,16 @@ module.exports = {
       const member = await interaction.guild.members.fetch(user.id);
 
       if (!member.roles.cache.has(role.id)) {
-        return interaction.reply({
-          content: `${user.tag} doesn't have this role.`,
-          ephemeral: true
-        });
+        return interaction.reply({ content: `${user.tag} doesn't have this role.`, ephemeral: true });
       }
-
       if (role.position >= interaction.member.roles.highest.position) {
-        return interaction.reply({
-          content: 'You cannot remove this role.',
-          ephemeral: true
-        });
+        return interaction.reply({ content: 'You cannot remove this role.', ephemeral: true });
       }
 
       await member.roles.remove(role);
 
       const embed = new EmbedBuilder()
-        .setTitle('Role Removed')
+        .setTitle('✅ Role Removed')
         .setDescription(`Removed ${role.name} from ${user.tag}`)
         .setColor(role.color || 0xff0000)
         .setTimestamp();
@@ -103,10 +84,7 @@ module.exports = {
       const role = interaction.options.getRole('role');
 
       if (role.position >= interaction.member.roles.highest.position) {
-        return interaction.reply({
-          content: 'You cannot manage this role.',
-          ephemeral: true
-        });
+        return interaction.reply({ content: 'You cannot manage this role.', ephemeral: true });
       }
 
       await interaction.deferReply();
@@ -127,7 +105,7 @@ module.exports = {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle(`Role ${action === 'add' ? 'Added' : 'Removed'}`)
+        .setTitle(`✅ Role ${action === 'add' ? 'Added' : 'Removed'}`)
         .setDescription(`${action === 'add' ? 'Added' : 'Removed'} ${role.name} ${action === 'add' ? 'to' : 'from'} ${count} members`)
         .setColor(role.color || 0x00ff00)
         .setTimestamp();

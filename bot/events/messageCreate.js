@@ -1,19 +1,18 @@
 const { EmbedBuilder } = require('discord.js');
-const path = require('path');
-const { tickets } = require('../commands/ticket');
 const { levelStorage } = require('../utils/localStorage');
+const { tickets } = require('../commands/ticket');
 
-// Load training data from JSON files
-const trainData = require('../data/traindata.json');
+// Load training data
+let knowledgeBase = {};
+try {
+  knowledgeBase = require('../data/traindata.json').knowledgeBase;
+} catch (err) {
+  console.error('Could not load traindata.json:', err.message);
+}
 
-// Use only knowledge base - English only
-const knowledgeBase = trainData.knowledgeBase;
-
-// English only fallback
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
 const fallbackResponse = `I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email ${SUPPORT_EMAIL}`;
 
-// Track user activity
 const userActivity = new Map();
 const lastRoasted = new Map();
 const aiResponseCooldown = new Map();
@@ -21,68 +20,50 @@ const userMessageTracker = new Map();
 const unknownQueryTracker = new Map();
 const processedMessages = new Set();
 
-// Spam prevention config
-const SPAM_CONFIG = trainData.spamPrevention || {
+const SPAM_CONFIG = {
   cooldownSeconds: 20,
   maxMessagesPerMinute: 3
 };
 
-// Staff role IDs to tag when AI doesn't know the answer
-const STAFF_ROLE_IDS = trainData.staffRoleIds.length > 0 
-  ? trainData.staffRoleIds 
-  : (process.env.STAFF_ROLE_IDS ? process.env.STAFF_ROLE_IDS.split(',') : []);
+const STAFF_ROLE_IDS = process.env.STAFF_ROLE_IDS ? process.env.STAFF_ROLE_IDS.split(',') : [];
 const OWNER_ID = process.env.OWNER_ID || '';
 
-// Clean up old processed messages every 5 minutes
 setInterval(() => {
   processedMessages.clear();
 }, 5 * 60 * 1000);
 
-// Match query to knowledge base (flexible matching with confidence)
 function matchQuery(message) {
   const msg = message.toLowerCase().trim();
   const words = msg.split(/\s+/);
   let bestMatch = null;
   let bestScore = 0;
-  const CONFIDENCE_THRESHOLD = 0.7; // Increased to 70% for better accuracy
-  
-  // Priority order for matching
+  const CONFIDENCE_THRESHOLD = 0.7;
+
   for (const [key, data] of Object.entries(knowledgeBase)) {
     for (const pattern of data.patterns) {
       const patternLower = pattern.toLowerCase().trim();
-      
-      // Exact match (highest priority)
+
       if (msg === patternLower) {
-        console.log(`[AI] EXACT match: "${pattern}" -> ${key}`);
         return key;
       }
-      
-      // Direct inclusion match (high priority)
+
       if (msg.includes(patternLower) && patternLower.length > 3) {
-        // Only match if pattern is significant (not just single common words)
         const score = patternLower.length / msg.length;
         if (score > bestScore) {
           bestScore = score;
           bestMatch = key;
-          console.log(`[AI] Direct inclusion: "${pattern}" -> ${key} (score: ${score.toFixed(2)})`);
         }
       }
-      
-      // Word-by-word matching (lower priority, stricter)
+
       const patternWords = patternLower.split(/\s+/);
-      if (patternWords.length >= 2) { // Only for multi-word patterns
+      if (patternWords.length >= 2) {
         let matchedCount = 0;
-        
         for (const pw of patternWords) {
-          if (pw.length > 3) { // Only match significant words
-            if (words.includes(pw) || words.some(w => w === pw)) {
-              matchedCount++;
-            }
+          if (pw.length > 3 && words.includes(pw)) {
+            matchedCount++;
           }
         }
-        
         const score = matchedCount / patternWords.length;
-        
         if (score >= CONFIDENCE_THRESHOLD && score > bestScore) {
           bestScore = score;
           bestMatch = key;
@@ -90,17 +71,10 @@ function matchQuery(message) {
       }
     }
   }
-  
-  if (bestMatch && bestScore > 0.5) {
-    console.log(`[AI] Best match: ${bestMatch} (score: ${bestScore.toFixed(2)})`);
-  } else if (msg.length > 3) {
-    console.log(`[AI] No match found for: "${msg.substring(0, 50)}"`);
-  }
-  
+
   return bestMatch;
 }
 
-// Simple roast generator (no external API)
 function generateRoast(username) {
   const roasts = [
     "has been so quiet, we thought they were a ghost!",
@@ -113,44 +87,31 @@ function generateRoast(username) {
   return roasts[Math.floor(Math.random() * roasts.length)];
 }
 
-// Generate AI Support Response - English only, knowledge base only
 function generateSupportResponse(userMessage) {
-  // Try knowledge base only
   const matchedKey = matchQuery(userMessage);
-  
+
   if (matchedKey) {
-    // Use English response only
     const response = knowledgeBase[matchedKey].responses.en || knowledgeBase[matchedKey].responses;
-    console.log(`[AI] Knowledge base response [${matchedKey}]: "${response.substring(0, 50)}..."`);
     return { response, isKnown: true };
   }
-  
-  // Unknown query - will trigger staff notification
-  console.log(`[AI] Unknown query, fallback response`);
+
   return { response: fallbackResponse, isKnown: false };
 }
 
-// Check if user is spamming
 function isUserSpamming(userId, channelId) {
   const now = Date.now();
   const key = `${userId}-${channelId}`;
   const userData = userMessageTracker.get(key) || { count: 0, firstMessage: now };
-  
-  // Reset if 1 minute has passed
+
   if (now - userData.firstMessage > 60000) {
     userData.count = 0;
     userData.firstMessage = now;
   }
-  
+
   userData.count++;
   userMessageTracker.set(key, userData);
-  
-  return userData.count > SPAM_CONFIG.maxMessagesPerMinute;
-}
 
-// Check if query is known (uses same flexible matching as matchQuery)
-function isKnownQuery(message) {
-  return matchQuery(message) !== null;
+  return userData.count > SPAM_CONFIG.maxMessagesPerMinute;
 }
 
 module.exports = {
@@ -163,63 +124,37 @@ module.exports = {
     const now = Date.now();
     const channelName = message.channel.name;
 
-    // Update activity
     userActivity.set(userId, now);
 
     // AI Support for Ticket Channels & AI-Support Channel
     const isTicketChannel = channelName.startsWith('ticket-');
     const isAISupportChannel = channelName === 'ai-support' || channelName.includes('ai-support');
-    
+
     if (isTicketChannel || isAISupportChannel) {
-      console.log(`[AI Debug] Processing message from ${message.author.tag} in #${channelName}: "${message.content.substring(0, 80)}"`);
-      
-      // Check if we already processed this message (prevent duplicates)
-      if (processedMessages.has(message.id)) {
-        console.log(`[AI Debug] Duplicate message, skipping`);
-        return;
-      }
+      if (processedMessages.has(message.id)) return;
       processedMessages.add(message.id);
-      
-      // Check if user is spamming
-      if (isUserSpamming(userId, message.channel.id)) {
-        console.log(`Spam detected from user ${userId} in ${channelName}`);
-        return; // Don't respond to spam
-      }
-      
-      // Get cooldown key for channel
+
+      if (isUserSpamming(userId, message.channel.id)) return;
+
       const cooldownKey = `channel-${message.channel.id}`;
       const lastResponse = aiResponseCooldown.get(cooldownKey) || 0;
       const timeSinceResponse = now - lastResponse;
 
-      // Only respond if it's been at least 20 seconds since last AI response (avoid spam)
       if (timeSinceResponse > (SPAM_CONFIG.cooldownSeconds * 1000)) {
-        let context = 'general support';
-        
-        // If it's a ticket channel, get ticket info
-        if (isTicketChannel) {
-          for (const [id, t] of tickets) {
-            if (t.channelId === message.channel.id && t.status === 'open') {
-              context = `ticket subject: ${t.subject}`;
-              break;
-            }
-          }
-        }
-
         const { response: aiResponse, isKnown } = generateSupportResponse(message.content);
-        
-        // Check if this is an unknown query
+
         const unknownKey = `unknown-${message.channel.id}`;
         const lastUnknownTag = unknownQueryTracker.get(unknownKey) || 0;
-        const shouldTagStaff = trainData.unknownQueryTagStaff && !isKnown && (now - lastUnknownTag > 300000); // 5 min cooldown
+        const shouldTagStaff = !isKnown && (now - lastUnknownTag > 300000);
 
         if (shouldTagStaff) {
           const mentions = [];
           if (OWNER_ID) mentions.push(`<@${OWNER_ID}>`);
           mentions.push(...STAFF_ROLE_IDS.map(id => `<@&${id}>`));
           const staffMentions = mentions.join(' ') || 'Support team needed!';
-          
+
           const embed = new EmbedBuilder()
-            .setTitle('🤖 Toolmetry AI Support')
+            .setTitle('🤖 AI Support')
             .setDescription(aiResponse)
             .setColor(0xFFA500)
             .setFooter({ text: 'AI Assistant • Staff has been notified' })
@@ -227,51 +162,46 @@ module.exports = {
 
           await message.channel.send({ content: staffMentions, embeds: [embed] });
           unknownQueryTracker.set(unknownKey, now);
-          console.log(`[AI] Staff tagged for unknown query in #${channelName}`);
         } else {
-          // Normal response without tagging
           const embed = new EmbedBuilder()
-            .setTitle('🤖 Toolmetry AI Support')
+            .setTitle('🤖 AI Support')
             .setDescription(aiResponse)
-            .setColor(isKnown ? 0x00D4AA : 0xFFA500) // Green for known, Orange for unknown
-            .setFooter({ text: isKnown ? 'Powered by AI • Toolmetry Support' : 'AI Assistant • Contact staff if needed' })
+            .setColor(isKnown ? 0x00D4AA : 0xFFA500)
+            .setFooter({ text: isKnown ? 'Powered by AI' : 'AI Assistant • Contact staff if needed' })
             .setTimestamp();
 
           await message.channel.send({ embeds: [embed] });
-          console.log(`[AI Debug] Response sent to #${channelName} (known: ${isKnown})`);
         }
-        
+
         aiResponseCooldown.set(cooldownKey, now);
       }
     }
 
-    // Check for inactive users to roast (every 10 messages)
+    // Check for inactive users to roast
     if (message.guild && Math.random() < 0.1) {
       const members = await message.guild.members.fetch();
       const inactiveUsers = [];
-      
+
       for (const [memberId, member] of members) {
         if (member.user.bot || memberId === userId) continue;
-        
+
         const lastActive = userActivity.get(memberId);
         const lastRoast = lastRoasted.get(memberId) || 0;
-        
-        // If inactive for 30+ minutes and not roasted in last 2 hours
+
         if (lastActive && (now - lastActive) > 30 * 60 * 1000 && (now - lastRoast) > 2 * 60 * 60 * 1000) {
           inactiveUsers.push(member);
         }
       }
 
-      // Roast a random inactive user
       if (inactiveUsers.length > 0) {
         const target = inactiveUsers[Math.floor(Math.random() * inactiveUsers.length)];
         const roastText = generateRoast(target.user.username);
-        
+
         const embed = new EmbedBuilder()
           .setTitle('🔥 Inactivity Roast!')
           .setDescription(`${target.user} ${roastText}`)
           .setColor(0xFF4500)
-          .setFooter({ text: 'Powered by AI • Toolmetry AI Bot' })
+          .setFooter({ text: 'Toolmetry AI Bot' })
           .setTimestamp();
 
         await message.channel.send({ embeds: [embed] });
@@ -288,12 +218,12 @@ module.exports = {
       let newLevel = currentData.level;
       let newXP = currentData.xp + gainedXP;
       let newMessages = (currentData.messages || 0) + 1;
-      
+
       if (newXP >= xpNeeded) {
         newLevel++;
         newXP = newXP - xpNeeded;
       }
-      
+
       levelStorage.set(key, { level: newLevel, xp: newXP, messages: newMessages });
     }
   }

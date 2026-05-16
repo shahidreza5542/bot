@@ -3,7 +3,7 @@ const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilde
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ticket-panel')
-    .setDescription('Send the ticket creation panel (Toolmetry AI)')
+    .setDescription('Send the ticket creation panel')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addChannelOption(option =>
       option
@@ -15,18 +15,18 @@ module.exports = {
     const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
 
     const embed = new EmbedBuilder()
-      .setTitle('🎫 Toolmetry AI Support')
+      .setTitle('🎫 Support Center')
       .setDescription(
-        '**Welcome to Toolmetry AI Support System!**\n\n' +
-        'Need help? Click the button below to create a ticket.\n\n' +
-        '🤖 **Our AI-powered support team is ready to assist you**\n' +
-        '⚡ **Fast response times guaranteed**\n' +
-        '🛡️ **Professional and friendly support**'
+        '**Need help? We\'re here for you!**\n\n' +
+        'Click the button below to create a support ticket.\n\n' +
+        '⚡ **Fast response times**\n' +
+        '🛡️ **Professional support**\n' +
+        '🤖 **AI-powered assistance**'
       )
       .setColor(0x00D4AA)
       .setThumbnail(interaction.client.user.displayAvatarURL())
-      .setFooter({ 
-        text: 'Powered by Toolmetry AI • Created with love for our community',
+      .setFooter({
+        text: 'Toolmetry AI Support System',
         iconURL: interaction.client.user.displayAvatarURL()
       })
       .setTimestamp();

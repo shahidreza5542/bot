@@ -5,7 +5,6 @@ const path = require('path');
 // Persistent ticket storage
 const TICKETS_FILE = path.join(__dirname, '../data/tickets.json');
 
-// Load tickets from file
 function loadTickets() {
   try {
     if (fs.existsSync(TICKETS_FILE)) {
@@ -25,7 +24,6 @@ function loadTickets() {
   return { tickets: new Map(), counter: 0 };
 }
 
-// Save tickets to file
 function saveTickets() {
   try {
     const ticketsObj = Object.fromEntries(tickets);
@@ -54,20 +52,18 @@ module.exports = {
     const guild = interaction.guild;
     const user = interaction.user;
 
-    // Check if user already has an open ticket
     for (const [id, ticket] of tickets) {
       if (ticket.userId === user.id && ticket.guildId === guild.id && ticket.status === 'open') {
         const existingChannel = guild.channels.cache.get(ticket.channelId);
         if (existingChannel) {
           return interaction.reply({
-            content: `⚠️ You already have an open ticket: ${existingChannel}`,
+            content: `You already have an open ticket: ${existingChannel}`,
             ephemeral: true
           });
         }
       }
     }
 
-    // Create ticket channel
     ticketCounter++;
     const channelName = `ticket-${ticketCounter.toString().padStart(4, '0')}`;
 
@@ -76,25 +72,15 @@ module.exports = {
         name: channelName,
         type: ChannelType.GuildText,
         permissionOverwrites: [
-          {
-            id: guild.id,
-            deny: [PermissionFlagsBits.ViewChannel]
-          },
-          {
-            id: user.id,
-            allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory]
-          },
-          {
-            id: guild.members.me.id,
-            allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageChannels]
-          }
+          { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+          { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] },
+          { id: guild.members.me.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageChannels] }
         ]
       });
 
-      // Store ticket in memory
       const ticketId = `TICKET-${ticketCounter}`;
       tickets.set(ticketId, {
-        ticketId: ticketId,
+        ticketId,
         guildId: guild.id,
         channelId: ticketChannel.id,
         userId: user.id,
@@ -104,22 +90,20 @@ module.exports = {
         claimedBy: null,
         createdAt: new Date()
       });
-      
-      // Save to file
+
       saveTickets();
 
-      // Send initial message
       const embed = new EmbedBuilder()
         .setTitle(`🎫 Ticket #${ticketCounter}`)
         .setDescription(
-          `**Welcome to Toolmetry AI Support!**\n\n` +
+          `**Welcome to Support!**\n\n` +
           `**Subject:** ${subject}\n` +
           `**User:** ${user.tag}\n` +
-          `**Created:** <t:${Math.floor(Date.now()/1000)}:R>`
+          `**Created:** <t:${Math.floor(Date.now() / 1000)}:R>`
         )
         .setColor(0x00D4AA)
         .setThumbnail(user.displayAvatarURL())
-        .setFooter({ text: 'Toolmetry AI Ticket System', iconURL: interaction.client.user.displayAvatarURL() })
+        .setFooter({ text: 'Toolmetry AI Ticket System' })
         .setTimestamp();
 
       const row = new ActionRowBuilder()
@@ -157,6 +141,5 @@ module.exports = {
   }
 };
 
-// Export tickets Map for use in interaction handler
 module.exports.tickets = tickets;
 module.exports.saveTickets = saveTickets;

@@ -74,12 +74,10 @@ module.exports = {
     const authorImage = interaction.options.getString('author_image');
     const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
 
-    // Validate color format
     if (colorInput && !colorInput.match(/^#[0-9A-Fa-f]{6}$/)) {
       return interaction.reply({ content: 'Invalid color format. Use hex like #4F46E5', ephemeral: true });
     }
 
-    // Convert hex color to integer
     const color = parseInt(colorInput.replace('#', ''), 16) || 0x4F46E5;
 
     const embed = new EmbedBuilder()
@@ -96,7 +94,7 @@ module.exports = {
 
     if (image) embed.setImage(image);
     if (thumbnail) embed.setThumbnail(thumbnail);
-    
+
     if (author) {
       const authorData = { name: author };
       if (authorImage) authorData.iconURL = authorImage;
@@ -104,7 +102,7 @@ module.exports = {
     }
 
     await targetChannel.send({ embeds: [embed] });
-    
+
     await interaction.reply({
       content: `✅ Embed sent to ${targetChannel}`,
       ephemeral: true

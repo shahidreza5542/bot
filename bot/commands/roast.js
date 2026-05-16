@@ -20,7 +20,12 @@ const roasts = [
   "You're so dumb, you tripped over a wireless network.",
   "You're like a slinky. Not really good for much, but brings a smile when pushed down stairs.",
   "You have the right to remain silent because whatever you say will probably be stupid.",
-  "I'd tell you to go outside, but you'd probably get lost in your own backyard."
+  "I'd tell you to go outside, but you'd probably get lost in your own backyard.",
+  "If laughter is the best medicine, your face must be curing the world.",
+  "You bring everyone so much joy when you leave the room.",
+  "I'd roast you, but my mom told me not to burn trash.",
+  "You're the reason they put instructions on shampoo bottles.",
+  "Somewhere out there, a tree is working hard to produce oxygen for you. You should apologize."
 ];
 
 module.exports = {
@@ -37,12 +42,16 @@ module.exports = {
     const targetUser = interaction.options.getUser('user');
     const roast = roasts[Math.floor(Math.random() * roasts.length)];
 
+    if (targetUser.id === interaction.user.id) {
+      return interaction.reply({ content: `You roasted yourself! ${roast} 🔥`, ephemeral: true });
+    }
+
     const embed = new EmbedBuilder()
       .setTitle('🔥 ROAST ALERT!')
       .setDescription(`${targetUser}, ${roast}`)
       .setColor(0xFF4500)
-      .setFooter({ 
-        text: `Roasted by ${interaction.user.tag} • Toolmetry AI Roast Master`,
+      .setFooter({
+        text: `Roasted by ${interaction.user.username}`,
         iconURL: interaction.user.displayAvatarURL()
       })
       .setTimestamp();

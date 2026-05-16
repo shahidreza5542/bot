@@ -3,27 +3,27 @@ const { createActionEmbed } = require('../utils/gifApi');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('hug')
-    .setDescription('Give someone a warm hug!')
+    .setName('kiss')
+    .setDescription('Give someone a sweet kiss! 💋')
     .addUserOption(option =>
       option
         .setName('user')
-        .setDescription('User to hug')
+        .setDescription('User to kiss')
         .setRequired(true)),
 
   async execute(interaction) {
     const targetUser = interaction.options.getUser('user');
 
     if (targetUser.id === interaction.user.id) {
-      return interaction.reply({ content: 'You hugged yourself! Aww, self-love is important! 🤗', ephemeral: true });
+      return interaction.reply({ content: 'You kissed yourself! Self-love wins! 💋', ephemeral: true });
     }
 
     const embed = await createActionEmbed({
-      title: '🤗 Hug!',
-      description: `**${interaction.user.username}** gave **${targetUser.username}** a big warm hug!`,
-      color: 0xFF69B4,
-      gifType: 'hug',
-      footerText: `${interaction.user.username} hugged ${targetUser.username}`
+      title: '💋 Kiss!',
+      description: `**${interaction.user.username}** gave **${targetUser.username}** a sweet kiss! 💕`,
+      color: 0xFF1493,
+      gifType: 'kiss',
+      footerText: `${interaction.user.username} kissed ${targetUser.username}`
     });
 
     await interaction.reply({ embeds: [embed] });

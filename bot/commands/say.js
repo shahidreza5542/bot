@@ -21,9 +21,9 @@ module.exports = {
     const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
 
     await targetChannel.send(message);
-    await interaction.reply({ 
-      content: `✅ Message sent to ${targetChannel}`,
-      ephemeral: true 
+    await interaction.reply({
+      content: `Message sent to ${targetChannel}`,
+      ephemeral: true
     });
   }
 };

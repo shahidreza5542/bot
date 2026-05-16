@@ -22,7 +22,6 @@ module.exports = {
     const reason = interaction.options.getString('reason') || 'No reason provided';
     const guildId = interaction.guild.id;
 
-    // Add warning to local storage
     const warning = {
       reason,
       moderator: interaction.user.tag,
@@ -31,7 +30,6 @@ module.exports = {
 
     const userWarnings = warningStorage.add(guildId, targetUser.id, warning);
 
-    // Send DM to user
     try {
       const dmEmbed = new EmbedBuilder()
         .setTitle('⚠️ Warning Received')
@@ -41,7 +39,7 @@ module.exports = {
           { name: 'Warned By', value: interaction.user.tag },
           { name: 'Total Warnings', value: `${userWarnings.length}` }
         )
-        .setColor(0x4F46E5) // Indigo 600
+        .setColor(0x4F46E5)
         .setTimestamp();
 
       await targetUser.send({ embeds: [dmEmbed] });
@@ -49,7 +47,6 @@ module.exports = {
       console.log('Could not DM user');
     }
 
-    // Reply in channel
     const embed = new EmbedBuilder()
       .setTitle('⚠️ User Warned')
       .setDescription(`${targetUser.tag} has been warned`)
@@ -58,11 +55,10 @@ module.exports = {
         { name: 'Warned By', value: interaction.user.tag, inline: true },
         { name: 'Total Warnings', value: `${userWarnings.filter(w => w.active).length}`, inline: true }
       )
-      .setColor(0x4F46E5) // Indigo 600
+      .setColor(0x4F46E5)
       .setThumbnail(targetUser.displayAvatarURL())
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
   }
 };
-

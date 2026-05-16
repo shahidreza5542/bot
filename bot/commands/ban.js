@@ -41,17 +41,10 @@ module.exports = {
 
     if (member) {
       if (member.roles.highest.position >= interaction.member.roles.highest.position) {
-        return interaction.reply({
-          content: 'You cannot ban this user.',
-          ephemeral: true
-        });
+        return interaction.reply({ content: 'You cannot ban this user.', ephemeral: true });
       }
-
       if (!member.bannable) {
-        return interaction.reply({
-          content: 'I cannot ban this user.',
-          ephemeral: true
-        });
+        return interaction.reply({ content: 'I cannot ban this user.', ephemeral: true });
       }
     }
 
@@ -61,7 +54,6 @@ module.exports = {
         reason: `${reason} | By: ${interaction.user.tag}`
       });
 
-      // Store ban in local storage
       banStorage.add({
         guildId: interaction.guild.id,
         userId: user.id,
@@ -73,7 +65,7 @@ module.exports = {
       });
 
       const embed = new EmbedBuilder()
-        .setTitle('User Banned')
+        .setTitle('🔨 User Banned')
         .setDescription(`${user.tag} has been banned`)
         .addFields(
           { name: 'Reason', value: reason },
@@ -87,10 +79,7 @@ module.exports = {
 
     } catch (err) {
       console.error('Error banning user:', err);
-      await interaction.reply({
-        content: 'Failed to ban user.',
-        ephemeral: true
-      });
+      await interaction.reply({ content: 'Failed to ban user.', ephemeral: true });
     }
   }
 };
