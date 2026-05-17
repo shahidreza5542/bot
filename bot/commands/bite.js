@@ -20,7 +20,7 @@ module.exports = {
 
     const embed = await createActionEmbed({
       title: '😬 Bite!',
-      description: `**${interaction.user.username}** bit **${targetUser.username}**! Nom nom!`,
+      description: `**${interaction.user.username}** bit **@${targetUser.username}**! Nom nom!`,
       color: 0xDC143C,
       gifType: 'bite',
       footerText: `${interaction.user.username} bit ${targetUser.username}`

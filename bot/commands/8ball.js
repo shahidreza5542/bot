@@ -3,22 +3,36 @@ const axios = require('axios');
 
 async function generateAI8Ball(question) {
   try {
-    const prompt = `Answer this question like a mysterious magic 8-ball: "${question}". Give a short mysterious answer (yes/no/maybe style). Keep it under 100 characters.`;
+    const prompt = `Answer like a magic 8-ball in short (yes/no/maybe). Question: ${question}`;
 
-    const response = await axios.get(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?seed=${Date.now()}&json=false`, {
-      timeout: 5000
-    });
+    const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}`;
 
-    return response.data || "The spirits are unclear...";
-  } catch (error) {
-    console.error('AI 8Ball Error:', error.message);
+    const res = await axios.get(url, { timeout: 7000 });
+
+    const text =
+      typeof res.data === 'string'
+        ? res.data
+        : res.data?.text || res.data?.result || "The spirits are unclear...";
+
+    return String(text).slice(0, 120);
+  } catch (e) {
     const fallback = [
-      "It is certain.", "Without a doubt.", "Yes definitely.",
-      "Reply hazy, try again.", "Ask again later.", "Better not tell you now.",
-      "Don't count on it.", "My reply is no.", "Very doubtful.",
-      "Signs point to yes.", "Most likely.", "Outlook good.",
-      "Cannot predict now.", "Concentrate and ask again.",
-      "My sources say no.", "Outlook not so good."
+      "It is certain.",
+      "Without a doubt.",
+      "Yes definitely.",
+      "Reply hazy, try again.",
+      "Ask again later.",
+      "Better not tell you now.",
+      "Don't count on it.",
+      "My reply is no.",
+      "Very doubtful.",
+      "Signs point to yes.",
+      "Most likely.",
+      "Outlook good.",
+      "Cannot predict now.",
+      "Concentrate and ask again.",
+      "My sources say no.",
+      "Outlook not so good."
     ];
     return fallback[Math.floor(Math.random() * fallback.length)];
   }
@@ -27,12 +41,10 @@ async function generateAI8Ball(question) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('8ball')
-    .setDescription('Ask the AI magic 8ball a question')
-    .addStringOption(option =>
-      option
-        .setName('question')
-        .setDescription('Your question for the 8ball')
-        .setRequired(true)),
+    .setDescription('Ask the magic 8-ball')
+    .addStringOption(o =>
+      o.setName('question').setDescription('Your question').setRequired(true)
+    ),
 
   async execute(interaction) {
     await interaction.deferReply();
@@ -41,13 +53,12 @@ module.exports = {
     const answer = await generateAI8Ball(question);
 
     const embed = new EmbedBuilder()
-      .setTitle('🎱 AI Magic 8-Ball')
+      .setTitle('🎱 Magic 8-Ball')
       .addFields(
-        { name: '🤔 Question', value: question },
-        { name: '✨ AI Answer', value: `**${answer}**` }
+        { name: 'Question', value: question.slice(0, 1024) },
+        { name: 'Answer', value: answer.slice(0, 1024) }
       )
       .setColor(0x800080)
-      .setFooter({ text: `Asked by ${interaction.user.tag}` })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });

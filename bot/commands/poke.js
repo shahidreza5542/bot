@@ -20,7 +20,7 @@ module.exports = {
 
     const embed = await createActionEmbed({
       title: '👉 Poke!',
-      description: `**${interaction.user.username}** poked **${targetUser.username}**! Hey!`,
+      description: `**${interaction.user.username}** poked **@${targetUser.username}**! Hey!`,
       color: 0x00CED1,
       gifType: 'poke',
       footerText: `${interaction.user.username} poked ${targetUser.username}`

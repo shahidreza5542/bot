@@ -17,7 +17,7 @@ module.exports = {
     const embed = await createActionEmbed({
       title: '😊 Blush!',
       description: targetUser
-        ? `**${targetUser.username}** made **${interaction.user.username}** blush!`
+        ? `**${targetUser.username}** made **@${interaction.user.username}** blush!`
         : `**${interaction.user.username}** is blushing!`,
       color: 0xFF9999,
       gifType: 'blush',
