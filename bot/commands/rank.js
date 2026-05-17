@@ -14,7 +14,7 @@ module.exports = {
   async execute(interaction) {
     const targetUser = interaction.options.getUser('user') || interaction.user;
     const guildId = interaction.guild.id;
-   
+
     try {
       const key = `xp-${guildId}-${targetUser.id}`;
       let levelData = levelStorage.get(key);
@@ -53,4 +53,3 @@ module.exports = {
     }
   }
 };
- 

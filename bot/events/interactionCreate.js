@@ -1,287 +1,363 @@
-const {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ChannelType,
-  PermissionFlagsBits
-} = require('discord.js');
-
-const {
-  tickets,
-  saveTickets,
-  reloadTickets
-} = require('../utils/ticketStorage');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits } = require('discord.js');
+const ticketStorage = require('../utils/ticketStorage');
 
 module.exports = {
   name: 'interactionCreate',
-
   async execute(interaction) {
+    // ---- BUTTON CLICKS ----
+    if (interaction.isButton()) {
+      return handleButton(interaction);
+    }
+
+    // ---- SLASH COMMANDS ----
+    if (!interaction.isChatInputCommand()) return;
+
+    const command = interaction.client.commands.get(interaction.commandName);
+    if (!command) return;
+
     try {
-      if (interaction.isButton()) {
-        return handleButton(interaction);
-      }
-
-      if (!interaction.isChatInputCommand()) return;
-
-      const command = interaction.client.commands.get(interaction.commandName);
-      if (!command) return;
-
       await command.execute(interaction);
-
-    } catch (err) {
-      console.error('Interaction Error:', err);
-
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({
-          content: '❌ Interaction failed',
-          flags: 64
-        }).catch(() => { });
-      }
+    } catch (error) {
+      console.error(`[Cmd Error] ${interaction.commandName}:`, error.message);
+      try {
+        const msg = { content: '❌ Error executing command!', ephemeral: true };
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(msg);
+        } else {
+          await interaction.reply(msg);
+        }
+      } catch (e) { /* ignore */ }
     }
   }
 };
 
-// ================= BUTTON ROUTER =================
+// ============================================================
+// BUTTON ROUTER
+// Custom IDs: t_new, t_claim_TICKET-X, t_close_TICKET-X, t_del_TICKET-X
+// ============================================================
 async function handleButton(interaction) {
+  const id = interaction.customId;
+
+  // Create ticket (from panel button)
+  if (id === 't_new') {
+    return await btnCreateTicket(interaction);
+  }
+
+  // Claim
+  if (id.startsWith('t_claim_')) {
+    const ticketId = id.slice(8); // remove 't_claim_'
+    return await btnClaim(interaction, ticketId);
+  }
+
+  // Close
+  if (id.startsWith('t_close_')) {
+    const ticketId = id.slice(8); // remove 't_close_'
+    return await btnClose(interaction, ticketId);
+  }
+
+  // Delete
+  if (id.startsWith('t_del_')) {
+    const ticketId = id.slice(6); // remove 't_del_'
+    return await btnDelete(interaction, ticketId);
+  }
+
+  // Unknown button
+  try { await interaction.reply({ content: '❓ Unknown button.', ephemeral: true }); } catch (e) { /* */ }
+}
+
+// ============================================================
+// SAFE REPLY HELPER
+// Always makes sure the user gets a response, never "thinking forever"
+// ============================================================
+async function safeReply(interaction, content, ephemeral = true) {
   try {
-    const id = interaction.customId;
-
-    // CREATE
-    if (id === 'ticket_create') {
-      return await handleTicketCreate(interaction);
+    if (interaction.deferred) {
+      await interaction.editReply({ content });
+    } else if (interaction.replied) {
+      await interaction.followUp({ content, ephemeral });
+    } else {
+      await interaction.reply({ content, ephemeral });
     }
-
-    // OLD FORMAT SUPPORT (IMPORTANT FIX)
-    if (id.startsWith('ticket_')) {
-      const parts = id.split('_'); // ticket_claim_123
-
-      if (parts.length !== 3) {
-        return interaction.reply({
-          content: '❌ Old button format detected. Recreate panel.',
-          flags: 64
-        });
-      }
-
-      const [, action, ticketId] = parts;
-
-      return await handleTicketAction(interaction, action, ticketId);
-    }
-
-    // NEW FORMAT
-    if (id.startsWith('ticket:')) {
-      const parts = id.split(':');
-
-      if (parts.length !== 3) {
-        return interaction.reply({
-          content: '❌ Invalid button format',
-          flags: 64
-        });
-      }
-
-      const [, action, ticketId] = parts;
-
-      return await handleTicketAction(interaction, action, ticketId);
-    }
-
-    return interaction.reply({
-      content: '❌ Unknown button',
-      flags: 64
-    });
-
-  } catch (err) {
-    console.error('Button error:', err);
-
-    if (!interaction.replied) {
-      await interaction.reply({
-        content: '❌ Button crash',
-        flags: 64
-      }).catch(() => { });
-    }
+  } catch (e) {
+    console.error('[Reply Error]', e.message);
   }
 }
 
-// ================= CREATE TICKET =================
-async function handleTicketCreate(interaction) {
+// ============================================================
+// CREATE TICKET (panel button)
+// ============================================================
+async function btnCreateTicket(interaction) {
   const guild = interaction.guild;
   const user = interaction.user;
 
+  // Step 1: Defer immediately (3 second deadline)
   try {
-    await interaction.deferReply({ flags: 64 });
-  } catch {
+    await interaction.deferReply({ ephemeral: true });
+  } catch (e) {
+    console.error('[Ticket] Defer failed:', e.message);
     return;
   }
 
-  const existing = [...tickets.values()].find(
-    t => t.userId === user.id && t.guildId === guild.id && t.status === 'open'
-  );
+  // Step 2: Validate
+  if (!guild) {
+    return await safeReply(interaction, '❌ This only works in a server.');
+  }
 
+  // Step 3: Check existing open ticket
+  const existing = ticketStorage.getOpenTicket(guild.id, user.id);
   if (existing) {
     const ch = guild.channels.cache.get(existing.channelId);
-    return interaction.editReply({
-      content: ch ? `❌ Already open: ${ch}` : '❌ Ticket already exists'
-    });
+    if (ch) {
+      return await safeReply(interaction, `❌ You already have an open ticket: ${ch}`);
+    } else {
+      // Stale ticket - clean up
+      ticketStorage.updateTicket(existing.ticketId, { status: 'closed' });
+    }
   }
 
-  const ticketId = `TICKET-${Date.now()}`;
-
-  let channel;
-
-  try {
-    const botMember =
-      guild.members.me ||
-      await guild.members.fetch(interaction.client.user.id).catch(() => null);
-
-    channel = await guild.channels.create({
-      name: `ticket-${Date.now()}`,
-      type: ChannelType.GuildText,
-      permissionOverwrites: [
-        {
-          id: guild.id,
-          deny: [PermissionFlagsBits.ViewChannel]
-        },
-        {
-          id: user.id,
-          allow: [
-            PermissionFlagsBits.ViewChannel,
-            PermissionFlagsBits.SendMessages,
-            PermissionFlagsBits.ReadMessageHistory
-          ]
-        },
-        botMember
-          ? {
-            id: botMember.id,
-            allow: [
-              PermissionFlagsBits.ViewChannel,
-              PermissionFlagsBits.SendMessages,
-              PermissionFlagsBits.ManageChannels
-            ]
-          }
-          : null
-      ].filter(Boolean)
-    });
-
-  } catch (err) {
-    console.error(err);
-    return interaction.editReply({ content: '❌ Failed to create ticket' });
-  }
-
-  tickets.set(ticketId, {
-    ticketId,
-    userId: user.id,
+  // Step 4: Create ticket data
+  const ticket = ticketStorage.createTicket({
     guildId: guild.id,
-    channelId: channel.id,
-    status: 'open',
-    createdAt: Date.now()
+    userId: user.id,
+    username: user.username,
+    subject: 'Support Ticket'
   });
 
-  saveTickets();
+  const channelName = `ticket-${ticket.ticketNumber.toString().padStart(4, '0')}`;
 
-  const embed = new EmbedBuilder()
-    .setTitle('🎫 Support Ticket')
-    .setDescription(`User: ${user.tag}`)
-    .setColor(0x00d4aa);
+  // Step 5: Create Discord channel
+  let ticketChannel;
+  try {
+    const botMember = guild.members.me;
+    const overwrites = [
+      { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+      { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }
+    ];
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`ticket:claim:${ticketId}`)
-      .setLabel('Claim')
-      .setStyle(ButtonStyle.Success),
+    if (botMember) {
+      overwrites.push({
+        id: botMember.id,
+        allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ReadMessageHistory]
+      });
+    }
 
-    new ButtonBuilder()
-      .setCustomId(`ticket:close:${ticketId}`)
-      .setLabel('Close')
-      .setStyle(ButtonStyle.Danger),
+    ticketChannel = await guild.channels.create({
+      name: channelName,
+      type: ChannelType.GuildText,
+      permissionOverwrites: overwrites
+    });
 
-    new ButtonBuilder()
-      .setCustomId(`ticket:delete:${ticketId}`)
-      .setLabel('Delete')
-      .setStyle(ButtonStyle.Secondary)
-  );
+    // Save channel ID
+    ticketStorage.updateTicket(ticket.ticketId, { channelId: ticketChannel.id });
+  } catch (err) {
+    console.error('[Ticket] Channel create error:', err.message);
+    ticketStorage.deleteTicket(ticket.ticketId);
+    return await safeReply(interaction, `❌ Failed to create ticket. Error: ${err.message}`);
+  }
 
-  await channel.send({ content: `${user}`, embeds: [embed], components: [row] });
+  // Step 6: Send embed + buttons in ticket channel
+  try {
+    const embed = new EmbedBuilder()
+      .setTitle(`🎫 Ticket #${ticket.ticketNumber}`)
+      .setDescription(
+        `**Welcome to Support!**\n\n` +
+        `**User:** <@${user.id}>\n` +
+        `**Created:** <t:${Math.floor(Date.now() / 1000)}:R>\n\n` +
+        `Describe your issue below. Our team will respond shortly!`
+      )
+      .setColor(0x00D4AA)
+      .setThumbnail(user.displayAvatarURL())
+      .setFooter({ text: 'Toolmetry AI Ticket System' })
+      .setTimestamp();
 
-  return interaction.editReply({
-    content: `✅ Ticket created: ${channel}`
-  });
+    const row = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`t_claim_${ticket.ticketId}`)
+          .setLabel('Claim')
+          .setStyle(ButtonStyle.Success)
+          .setEmoji('👋'),
+        new ButtonBuilder()
+          .setCustomId(`t_close_${ticket.ticketId}`)
+          .setLabel('Close')
+          .setStyle(ButtonStyle.Danger)
+          .setEmoji('🔒'),
+        new ButtonBuilder()
+          .setCustomId(`t_del_${ticket.ticketId}`)
+          .setLabel('Delete')
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('🗑️')
+      );
+
+    await ticketChannel.send({ content: `<@${user.id}>`, embeds: [embed], components: [row] });
+  } catch (err) {
+    console.error('[Ticket] Embed send error:', err.message);
+    // Channel was created, still notify user
+    return await safeReply(interaction, `✅ Ticket created: ${ticketChannel} (embed failed)`);
+  }
+
+  // Step 7: Success
+  return await safeReply(interaction, `✅ Ticket created: ${ticketChannel}`);
 }
 
-// ================= ACTION HANDLER =================
-async function handleTicketAction(interaction, action, ticketId) {
-  let ticket = tickets.get(ticketId);
+// ============================================================
+// CLAIM TICKET
+// ============================================================
+async function btnClaim(interaction, ticketId) {
+  // Defer first
+  try { await interaction.deferReply({ ephemeral: true }); } catch (e) { return; }
 
-  if (!ticket) {
-    try {
-      reloadTickets();
-      ticket = tickets.get(ticketId);
-    } catch { }
-  }
-
-  if (!ticket) {
-    return interaction.reply({
-      content: '❌ Ticket not found',
-      flags: 64
-    });
-  }
-
+  const member = interaction.member;
   const channel = interaction.channel;
+  const guild = interaction.guild;
+
+  // Get ticket
+  const ticket = ticketStorage.getTicket(ticketId);
+  if (!ticket) {
+    return await safeReply(interaction, '❌ This ticket no longer exists. Create a new one.');
+  }
+
+  // Permission check
+  if (!member?.permissions?.has(PermissionFlagsBits.ManageMessages)) {
+    return await safeReply(interaction, '❌ Only staff can claim tickets.');
+  }
+
+  // Already claimed?
+  if (ticket.claimedBy) {
+    return await safeReply(interaction, '❌ Already claimed by another staff member.');
+  }
+
+  // Claim it
+  ticketStorage.updateTicket(ticketId, {
+    claimedBy: member.user.id,
+    claimedAt: new Date().toISOString()
+  });
+
+  // Update embed in channel
+  try {
+    const messages = await channel.messages.fetch({ limit: 10 });
+    const panelMsg = messages.find(m => m.embeds?.[0]?.title?.includes('Ticket #'));
+
+    if (panelMsg?.embeds?.[0]) {
+      const old = panelMsg.embeds[0];
+      const updated = new EmbedBuilder()
+        .setTitle(old.title)
+        .setDescription(old.description)
+        .setColor(0x22C55E)
+        .setThumbnail(old.thumbnail?.url || null)
+        .addFields({ name: '👋 Claimed By', value: `<@${member.user.id}>`, inline: true })
+        .setFooter({ text: 'Ticket Claimed' })
+        .setTimestamp();
+
+      await panelMsg.edit({ embeds: [updated] });
+    }
+  } catch (err) {
+    console.warn('[Ticket] Embed update failed:', err.message);
+  }
+
+  await channel.send(`✅ <@${member.user.id}> claimed this ticket!`);
+  return await safeReply(interaction, '✅ You claimed this ticket!');
+}
+
+// ============================================================
+// CLOSE TICKET
+// ============================================================
+async function btnClose(interaction, ticketId) {
+  try { await interaction.deferReply(); } catch (e) { return; }
+
   const member = interaction.member;
   const user = interaction.user;
+  const channel = interaction.channel;
 
-  // CLAIM
-  if (action === 'claim') {
-    if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-      return interaction.reply({
-        content: '❌ No permission',
-        flags: 64
-      });
+  // Get ticket
+  const ticket = ticketStorage.getTicket(ticketId);
+  if (!ticket) {
+    return await safeReply(interaction, '❌ Ticket not found. It may have been deleted.');
+  }
+
+  // Permission: staff or ticket owner
+  const isStaff = member?.permissions?.has(PermissionFlagsBits.ManageMessages);
+  const isOwner = ticket.userId === user.id;
+  if (!isStaff && !isOwner) {
+    return await safeReply(interaction, '❌ Only staff or ticket owner can close this.');
+  }
+
+  if (ticket.status === 'closed') {
+    return await safeReply(interaction, '❌ Already closed.');
+  }
+
+  // Close it
+  ticketStorage.updateTicket(ticketId, {
+    status: 'closed',
+    closedBy: user.id,
+    closedAt: new Date().toISOString()
+  });
+
+  // Update embed - remove buttons
+  try {
+    const messages = await channel.messages.fetch({ limit: 10 });
+    const panelMsg = messages.find(m => m.embeds?.[0]?.title?.includes('Ticket #'));
+
+    if (panelMsg?.embeds?.[0]) {
+      const old = panelMsg.embeds[0];
+      const closed = new EmbedBuilder()
+        .setTitle(old.title + ' [CLOSED]')
+        .setDescription(old.description)
+        .setColor(0xEF4444)
+        .setThumbnail(old.thumbnail?.url || null)
+        .addFields({ name: '🔒 Closed By', value: `<@${user.id}>`, inline: true })
+        .setFooter({ text: 'Ticket Closed' })
+        .setTimestamp();
+
+      await panelMsg.edit({ embeds: [closed], components: [] });
     }
-
-    ticket.claimedBy = user.id;
-    saveTickets();
-
-    await channel.send(`👋 Claimed by ${user.tag}`);
-
-    return interaction.reply({
-      content: '✅ Claimed',
-      flags: 64
-    });
+  } catch (err) {
+    console.warn('[Ticket] Embed update failed:', err.message);
   }
 
-  // CLOSE
-  if (action === 'close') {
-    ticket.status = 'closed';
-    saveTickets();
+  await channel.send(`🔒 Ticket closed by <@${user.id}>. Channel will be deleted in 30 seconds.`);
+  await interaction.editReply('✅ Ticket closed. Channel will be deleted in 30 seconds.');
 
-    await channel.send(`🔒 Closed by ${user.tag}`);
-
-    return interaction.reply({
-      content: '✅ Closed',
-      flags: 64
-    });
-  }
-
-  // DELETE
-  if (action === 'delete') {
-    if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-      return interaction.reply({
-        content: '❌ No permission',
-        flags: 64
-      });
+  // Auto-delete channel after 30 seconds
+  setTimeout(async () => {
+    try {
+      await channel.delete('Ticket closed');
+    } catch (err) {
+      console.error('[Ticket] Channel delete error:', err.message);
     }
+    ticketStorage.deleteTicket(ticketId);
+  }, 30000);
+}
 
-    await interaction.reply({
-      content: '🗑️ Deleting ticket...',
-      flags: 64
-    });
+// ============================================================
+// DELETE TICKET
+// ============================================================
+async function btnDelete(interaction, ticketId) {
+  try { await interaction.deferReply(); } catch (e) { return; }
 
-    setTimeout(async () => {
-      try {
-        await channel.delete();
-      } catch { }
+  const member = interaction.member;
+  const channel = interaction.channel;
 
-      tickets.delete(ticketId);
-      saveTickets();
-    }, 2000);
+  // Permission
+  if (!member?.permissions?.has(PermissionFlagsBits.ManageMessages)) {
+    return await interaction.editReply('❌ Only staff can delete tickets.');
   }
+
+  // Get ticket
+  const ticket = ticketStorage.getTicket(ticketId);
+  if (!ticket) {
+    return await interaction.editReply('❌ Ticket not found.');
+  }
+
+  await interaction.editReply('🗑️ Deleting ticket...');
+
+  // Delete after short delay
+  setTimeout(async () => {
+    try {
+      await channel.delete('Ticket deleted by staff');
+    } catch (err) {
+      console.error('[Ticket] Channel delete error:', err.message);
+    }
+    ticketStorage.deleteTicket(ticketId);
+  }, 2000);
 }

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const { createActionEmbed } = require('../utils/gifApi');
 
 module.exports = {
@@ -6,26 +6,20 @@ module.exports = {
     .setName('feed')
     .setDescription('Feed someone some tasty food!')
     .addUserOption(option =>
-      option
-        .setName('user')
-        .setDescription('User to feed')
-        .setRequired(true)),
+      option.setName('user').setDescription('User to feed').setRequired(true)),
 
   async execute(interaction) {
-    const targetUser = interaction.options.getUser('user');
-
-    if (targetUser.id === interaction.user.id) {
+    const target = interaction.options.getUser('user');
+    if (target.id === interaction.user.id) {
       return interaction.reply({ content: 'You fed yourself! Yummy! 🍕', ephemeral: true });
     }
-
     const embed = await createActionEmbed({
       title: '🍕 Feed!',
-      description: `**${interaction.user.username}** fed **${targetUser.username}** something delicious!`,
+      description: `<@${interaction.user.id}> fed <@${target.id}> something delicious!`,
       color: 0xFFA500,
       gifType: 'feed',
-      footerText: `${interaction.user.username} fed ${targetUser.username}`
+      footerText: `${interaction.user.username} fed ${target.username}`
     });
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ content: `<@${target.id}>`, embeds: [embed] });
   }
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const { createActionEmbed } = require('../utils/gifApi');
 
 module.exports = {
@@ -6,26 +6,20 @@ module.exports = {
     .setName('kiss')
     .setDescription('Give someone a sweet kiss! 💋')
     .addUserOption(option =>
-      option
-        .setName('user')
-        .setDescription('User to kiss')
-        .setRequired(true)),
+      option.setName('user').setDescription('User to kiss').setRequired(true)),
 
   async execute(interaction) {
-    const targetUser = interaction.options.getUser('user');
-
-    if (targetUser.id === interaction.user.id) {
+    const target = interaction.options.getUser('user');
+    if (target.id === interaction.user.id) {
       return interaction.reply({ content: 'You kissed yourself! Self-love wins! 💋', ephemeral: true });
     }
-
     const embed = await createActionEmbed({
       title: '💋 Kiss!',
-      description: `**${interaction.user.username}** gave **${targetUser.username}** a sweet kiss! 💕`,
+      description: `<@${interaction.user.id}> gave <@${target.id}> a sweet kiss! 💕`,
       color: 0xFF1493,
       gifType: 'kiss',
-      footerText: `${interaction.user.username} kissed ${targetUser.username}`
+      footerText: `${interaction.user.username} kissed ${target.username}`
     });
-
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ content: `<@${target.id}>`, embeds: [embed] });
   }
 };
