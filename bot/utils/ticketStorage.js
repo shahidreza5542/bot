@@ -75,8 +75,5 @@ loadTickets();
 module.exports = {
   tickets,
   saveTickets,
-  loadTickets,
-  reloadTickets,
-  getNextTicketNumber,
-  TICKETS_FILE
+  getNextTicketNumber
 };
