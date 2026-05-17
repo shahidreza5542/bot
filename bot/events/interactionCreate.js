@@ -50,9 +50,9 @@ module.exports = {
   }
 };
 
-// ===============================
+
 // BUTTON HANDLER
-// ===============================
+
 async function handleButton(interaction) {
   if (interaction.replied || interaction.deferred) return;
 
@@ -72,9 +72,8 @@ async function handleButton(interaction) {
   return handleTicketAction(interaction, action, ticketId);
 }
 
-// ===============================
 // CREATE TICKET
-// ===============================
+
 async function handleTicketCreate(interaction) {
   const guild = interaction.guild;
   const user = interaction.user;
@@ -176,9 +175,9 @@ async function handleTicketCreate(interaction) {
   return interaction.editReply({ content: `✅ Ticket created: ${channel}` });
 }
 
-// ===============================
+
 // ACTION HANDLER
-// ===============================
+
 async function handleTicketAction(interaction, action, ticketId) {
   let ticket = tickets.get(ticketId);
 
