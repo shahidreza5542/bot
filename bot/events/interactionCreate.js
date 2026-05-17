@@ -54,22 +54,42 @@ module.exports = {
 // BUTTON HANDLER
 
 async function handleButton(interaction) {
-  if (interaction.replied || interaction.deferred) return;
+  try {
+    const customId = interaction.customId;
 
-  const customId = interaction.customId;
+    if (customId === 'ticket_create') {
+      return await handleTicketCreate(interaction);
+    }
 
-  if (customId === 'ticket_create') {
-    return handleTicketCreate(interaction);
+    if (!customId.startsWith('ticket:')) {
+      return await interaction.reply({
+        content: '❌ Unknown button action',
+        ephemeral: true
+      });
+    }
+
+    const parts = customId.split(':');
+    if (parts.length !== 3) {
+      return await interaction.reply({
+        content: '❌ Invalid button format',
+        ephemeral: true
+      });
+    }
+
+    const [, action, ticketId] = parts;
+
+    return await handleTicketAction(interaction, action, ticketId);
+
+  } catch (err) {
+    console.error('Button handler error:', err);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content: '❌ Button error occurred',
+        ephemeral: true
+      });
+    }
   }
-
-  if (!customId.startsWith('ticket:')) return;
-
-  const parts = customId.split(':');
-  if (parts.length !== 3) return;
-
-  const [, action, ticketId] = parts;
-
-  return handleTicketAction(interaction, action, ticketId);
 }
 
 // CREATE TICKET
