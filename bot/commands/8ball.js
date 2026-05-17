@@ -3,36 +3,32 @@ const axios = require('axios');
 
 async function generateAI8Ball(question) {
   try {
-    const prompt = `Answer like a magic 8-ball in short (yes/no/maybe). Question: ${question}`;
+    const prompt = `You are a magic 8-ball. Reply ONLY in a short phrase (yes/no/maybe style). Question: ${question}`;
 
-    const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}`;
+    const res = await axios.get(
+      `https://text.pollinations.ai/?text=${encodeURIComponent(prompt)}`,
+      { timeout: 7000 }
+    );
 
-    const res = await axios.get(url, { timeout: 7000 });
+    let text = res.data;
 
-    const text =
-      typeof res.data === 'string'
-        ? res.data
-        : res.data?.text || res.data?.result || "The spirits are unclear...";
+    if (typeof text !== 'string') {
+      text = text?.text || text?.result || "";
+    }
 
-    return String(text).slice(0, 120);
+    text = String(text).replace(/\n/g, " ").trim();
+
+    if (!text) return "Ask again later.";
+
+    return text.slice(0, 80);
   } catch (e) {
     const fallback = [
       "It is certain.",
       "Without a doubt.",
-      "Yes definitely.",
-      "Reply hazy, try again.",
+      "Yes.",
+      "No.",
       "Ask again later.",
-      "Better not tell you now.",
-      "Don't count on it.",
-      "My reply is no.",
-      "Very doubtful.",
-      "Signs point to yes.",
-      "Most likely.",
-      "Outlook good.",
-      "Cannot predict now.",
-      "Concentrate and ask again.",
-      "My sources say no.",
-      "Outlook not so good."
+      "Very doubtful."
     ];
     return fallback[Math.floor(Math.random() * fallback.length)];
   }
@@ -42,8 +38,10 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('8ball')
     .setDescription('Ask the magic 8-ball')
-    .addStringOption(o =>
-      o.setName('question').setDescription('Your question').setRequired(true)
+    .addStringOption(option =>
+      option.setName('question')
+        .setDescription('Your question')
+        .setRequired(true)
     ),
 
   async execute(interaction) {
