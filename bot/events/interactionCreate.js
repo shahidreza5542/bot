@@ -45,7 +45,7 @@ module.exports = {
             ephemeral: true
           });
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 };
@@ -100,7 +100,8 @@ async function handleTicketCreate(interaction) {
 
   try {
     await interaction.deferReply({ ephemeral: true });
-  } catch {
+  } catch (err) {
+    console.error('Defer failed:', err);
     return;
   }
 
@@ -141,13 +142,13 @@ async function handleTicketCreate(interaction) {
         },
         botMember
           ? {
-              id: botMember.id,
-              allow: [
-                PermissionFlagsBits.ViewChannel,
-                PermissionFlagsBits.SendMessages,
-                PermissionFlagsBits.ManageChannels
-              ]
-            }
+            id: botMember.id,
+            allow: [
+              PermissionFlagsBits.ViewChannel,
+              PermissionFlagsBits.SendMessages,
+              PermissionFlagsBits.ManageChannels
+            ]
+          }
           : null
       ].filter(Boolean)
     });
@@ -251,7 +252,7 @@ async function handleTicketAction(interaction, action, ticketId) {
     setTimeout(async () => {
       try {
         await channel.delete();
-      } catch {}
+      } catch { }
       tickets.delete(ticketId);
       saveTickets();
     }, 2000);
