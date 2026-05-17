@@ -35,8 +35,8 @@ module.exports = {
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
           content: '❌ Interaction failed',
-          ephemeral: true
-        }).catch(() => {});
+          flags: 64
+        }).catch(() => { });
       }
     }
   }
@@ -52,27 +52,52 @@ async function handleButton(interaction) {
       return await handleTicketCreate(interaction);
     }
 
-    // VALIDATION
-    if (!id.includes(':')) {
-      return interaction.reply({
-        content: '❌ Old or invalid button detected. Recreate panel.',
-        ephemeral: true
-      });
+    // OLD FORMAT SUPPORT (IMPORTANT FIX)
+    if (id.startsWith('ticket_')) {
+      const parts = id.split('_'); // ticket_claim_123
+
+      if (parts.length !== 3) {
+        return interaction.reply({
+          content: '❌ Old button format detected. Recreate panel.',
+          flags: 64
+        });
+      }
+
+      const [, action, ticketId] = parts;
+
+      return await handleTicketAction(interaction, action, ticketId);
     }
 
-    const [prefix, action, ticketId] = id.split(':');
+    // NEW FORMAT
+    if (id.startsWith('ticket:')) {
+      const parts = id.split(':');
 
-    if (prefix !== 'ticket' || !action || !ticketId) {
-      return interaction.reply({
-        content: '❌ Invalid button format',
-        ephemeral: true
-      });
+      if (parts.length !== 3) {
+        return interaction.reply({
+          content: '❌ Invalid button format',
+          flags: 64
+        });
+      }
+
+      const [, action, ticketId] = parts;
+
+      return await handleTicketAction(interaction, action, ticketId);
     }
 
-    return handleTicketAction(interaction, action, ticketId);
+    return interaction.reply({
+      content: '❌ Unknown button',
+      flags: 64
+    });
 
   } catch (err) {
-    console.error('Button Error:', err);
+    console.error('Button error:', err);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content: '❌ Button crash',
+        flags: 64
+      }).catch(() => { });
+    }
   }
 }
 
@@ -82,7 +107,7 @@ async function handleTicketCreate(interaction) {
   const user = interaction.user;
 
   try {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: 64 });
   } catch {
     return;
   }
@@ -125,13 +150,13 @@ async function handleTicketCreate(interaction) {
         },
         botMember
           ? {
-              id: botMember.id,
-              allow: [
-                PermissionFlagsBits.ViewChannel,
-                PermissionFlagsBits.SendMessages,
-                PermissionFlagsBits.ManageChannels
-              ]
-            }
+            id: botMember.id,
+            allow: [
+              PermissionFlagsBits.ViewChannel,
+              PermissionFlagsBits.SendMessages,
+              PermissionFlagsBits.ManageChannels
+            ]
+          }
           : null
       ].filter(Boolean)
     });
@@ -189,13 +214,13 @@ async function handleTicketAction(interaction, action, ticketId) {
     try {
       reloadTickets();
       ticket = tickets.get(ticketId);
-    } catch {}
+    } catch { }
   }
 
   if (!ticket) {
     return interaction.reply({
       content: '❌ Ticket not found',
-      ephemeral: true
+      flags: 64
     });
   }
 
@@ -208,7 +233,7 @@ async function handleTicketAction(interaction, action, ticketId) {
     if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
       return interaction.reply({
         content: '❌ No permission',
-        ephemeral: true
+        flags: 64
       });
     }
 
@@ -219,7 +244,7 @@ async function handleTicketAction(interaction, action, ticketId) {
 
     return interaction.reply({
       content: '✅ Claimed',
-      ephemeral: true
+      flags: 64
     });
   }
 
@@ -232,7 +257,7 @@ async function handleTicketAction(interaction, action, ticketId) {
 
     return interaction.reply({
       content: '✅ Closed',
-      ephemeral: true
+      flags: 64
     });
   }
 
@@ -241,19 +266,19 @@ async function handleTicketAction(interaction, action, ticketId) {
     if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
       return interaction.reply({
         content: '❌ No permission',
-        ephemeral: true
+        flags: 64
       });
     }
 
     await interaction.reply({
       content: '🗑️ Deleting ticket...',
-      ephemeral: true
+      flags: 64
     });
 
     setTimeout(async () => {
       try {
         await channel.delete();
-      } catch {}
+      } catch { }
 
       tickets.delete(ticketId);
       saveTickets();
