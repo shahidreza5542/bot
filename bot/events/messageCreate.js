@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { levelStorage } = require('../utils/localStorage');
-const { tickets } = require('../commands/ticket');
+const { tickets } = require('../utils/ticketStorage');
 
 // Load training data
 let knowledgeBase = {};

@@ -1,9 +1,27 @@
 const axios = require('axios');
 
+/**
+ * GIF API System - Multi-tier fallback for maximum reliability
+ *
+ * Primary:   nekos.best API v2 (https://nekos.best/api/v2) - User requested
+ * Secondary: purrbot API v2 (https://api.purrbot.site/v2)  - Auto fallback
+ * Tertiary:  Hardcoded CDN URLs                            - Last resort
+ *
+ * No API key required for any of these services.
+ */
+
+// ============================================================
+// API Endpoints
+// ============================================================
 const NEKOS_BASE = 'https://nekos.best/api/v2';
+const PURRBOT_BASE = 'https://api.purrbot.site/v2/img/sfw';
 
+// ============================================================
+// Category Mapping
+// ============================================================
 
-const categoryMap = {
+// Maps our internal gifType to nekos.best category names
+const nekosCategoryMap = {
   hug: 'hug',
   slap: 'slap',
   kiss: 'kiss',
@@ -19,124 +37,223 @@ const categoryMap = {
   blush: 'blush',
   smile: 'happy',
   kick: 'kick',
-  handhold: 'holdhand',
-  nom: 'nom',
-  smug: 'smug',
-  stare: 'stare',
-  think: 'think',
-  wink: 'wink',
-  cringe: 'cringe',
   cry: 'cry',
   pout: 'pout',
-  shoot: 'shoot',
+  lick: 'lick',
+  smug: 'smug',
+  stare: 'stare',
+  wink: 'wink',
+  think: 'think',
   shrug: 'shrug',
   sleep: 'sleep',
+  cringe: 'cringe',
+  shoot: 'shoot',
   laugh: 'laugh',
   punch: 'punch',
   snuggle: 'snuggle',
   glomp: 'glomp',
   peck: 'peck',
-  lick: 'lick',
-  nuzzle: 'nuzzle'
+  nuzzle: 'nuzzle',
+  nom: 'nom',
+  handhold: 'holdhand'
 };
 
-// Fallback GIF URLs in case API is down
+// Maps our internal gifType to purrbot category names
+// Only categories that purrbot supports
+const purrbotCategoryMap = {
+  hug: 'hug',
+  slap: 'slap',
+  kiss: 'kiss',
+  pat: 'pat',
+  cuddle: 'cuddle',
+  poke: 'poke',
+  feed: 'feed',
+  bite: 'bite',
+  dance: 'dance',
+  tickle: 'tickle',
+  blush: 'blush',
+  smile: 'smile',
+  cry: 'cry',
+  pout: 'pout',
+  lick: 'lick'
+};
+
+// ============================================================
+// Hardcoded Fallback GIFs (CDN URLs - last resort)
+// ============================================================
 const fallbackGifs = {
   hug: [
-    'https://nekos.best/api/v2/hug/0c0095a3-d0f5-4b4d-a33a-1e6b6e85e4ef.gif',
-    'https://nekos.best/api/v2/hug/0c6cd3e3-4441-4a4d-a5dc-d9e31e0e0ef0.gif'
+    'https://cdn.purrbot.site/sfw/hug/gif/hug_028.gif',
+    'https://cdn.purrbot.site/sfw/hug/gif/hug_014.gif',
+    'https://cdn.purrbot.site/sfw/hug/gif/hug_040.gif'
   ],
   slap: [
-    'https://nekos.best/api/v2/slap/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif',
-    'https://nekos.best/api/v2/slap/00e4ee4e-7b1e-4a3d-a8a0-f5279d15e570.gif'
+    'https://cdn.purrbot.site/sfw/slap/gif/slap_014.gif',
+    'https://cdn.purrbot.site/sfw/slap/gif/slap_025.gif'
   ],
   kiss: [
-    'https://nekos.best/api/v2/kiss/00e4ee4e-7b1e-4a3d-a8a0-f5279d15e570.gif',
-    'https://nekos.best/api/v2/kiss/0c0095a3-d0f5-4b4d-a33a-1e6b6e85e4ef.gif'
+    'https://cdn.purrbot.site/sfw/kiss/gif/kiss_029.gif',
+    'https://cdn.purrbot.site/sfw/kiss/gif/kiss_015.gif'
   ],
   pat: [
-    'https://nekos.best/api/v2/pat/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif',
-    'https://nekos.best/api/v2/pat/0c6cd3e3-4441-4a4d-a5dc-d9e31e0e0ef0.gif'
+    'https://cdn.purrbot.site/sfw/pat/gif/pat_064.gif',
+    'https://cdn.purrbot.site/sfw/pat/gif/pat_030.gif'
   ],
   cuddle: [
-    'https://nekos.best/api/v2/cuddle/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif',
-    'https://nekos.best/api/v2/cuddle/0c6cd3e3-4441-4a4d-a5dc-d9e31e0e0ef0.gif'
+    'https://cdn.purrbot.site/sfw/cuddle/gif/cuddle_040.gif',
+    'https://cdn.purrbot.site/sfw/cuddle/gif/cuddle_025.gif'
   ],
   poke: [
-    'https://nekos.best/api/v2/poke/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/poke/gif/poke_025.gif',
+    'https://cdn.purrbot.site/sfw/poke/gif/poke_010.gif'
   ],
   feed: [
-    'https://nekos.best/api/v2/feed/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/feed/gif/feed_006.gif',
+    'https://cdn.purrbot.site/sfw/feed/gif/feed_003.gif'
   ],
   bite: [
-    'https://nekos.best/api/v2/bite/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/bite/gif/bite_007.gif',
+    'https://cdn.purrbot.site/sfw/bite/gif/bite_003.gif'
   ],
   dance: [
-    'https://nekos.best/api/v2/dance/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/dance/gif/dance_013.gif',
+    'https://cdn.purrbot.site/sfw/dance/gif/dance_025.gif'
   ],
   wave: [
-    'https://nekos.best/api/v2/wave/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/pat/gif/pat_064.gif'
   ],
   highfive: [
-    'https://nekos.best/api/v2/highfive/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/hug/gif/hug_028.gif'
   ],
   tickle: [
-    'https://nekos.best/api/v2/tickle/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/tickle/gif/tickle_013.gif',
+    'https://cdn.purrbot.site/sfw/tickle/gif/tickle_025.gif'
   ],
   blush: [
-    'https://nekos.best/api/v2/blush/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/blush/gif/blush_022.gif',
+    'https://cdn.purrbot.site/sfw/blush/gif/blush_010.gif'
   ],
   smile: [
-    'https://nekos.best/api/v2/happy/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/smile/gif/smile_006.gif',
+    'https://cdn.purrbot.site/sfw/smile/gif/smile_015.gif'
   ],
   kick: [
-    'https://nekos.best/api/v2/kick/00cc4b13-7d0e-4f47-8a90-a6e6c2e5c0ea.gif'
+    'https://cdn.purrbot.site/sfw/slap/gif/slap_014.gif'
+  ],
+  cry: [
+    'https://cdn.purrbot.site/sfw/cry/gif/cry_010.gif',
+    'https://cdn.purrbot.site/sfw/cry/gif/cry_025.gif'
+  ],
+  pout: [
+    'https://cdn.purrbot.site/sfw/pout/gif/pout_010.gif',
+    'https://cdn.purrbot.site/sfw/pout/gif/pout_025.gif'
+  ],
+  lick: [
+    'https://cdn.purrbot.site/sfw/lick/gif/lick_010.gif',
+    'https://cdn.purrbot.site/sfw/lick/gif/lick_025.gif'
   ]
 };
 
+// ============================================================
+// API Fetch Functions
+// ============================================================
+
 /**
- * Fetch a random GIF from nekos.best API v2
- * @param {string} type - The type of GIF (hug, slap, kiss, pat, etc.)
- * @returns {Promise<string>} - URL of the GIF
+ * Fetch GIF from nekos.best API v2 (PRIMARY)
+ * Endpoint: GET https://nekos.best/api/v2/{category}?amount=1
+ * Response: { results: [{ url: "...", anime_name: "..." }] }
  */
-async function fetchGif(type) {
-  try {
-    // Map our gifType to nekos.best category
-    const category = categoryMap[type] || type;
+async function fetchFromNekosBest(type) {
+  const category = nekosCategoryMap[type] || type;
+  const response = await axios.get(`${NEKOS_BASE}/${category}`, {
+    params: { amount: 1 },
+    timeout: 6000
+  });
 
-    const response = await axios.get(`${NEKOS_BASE}/${category}`, {
-      params: { amount: 1 },
-      timeout: 8000
-    });
-
-    // nekos.best v2 returns { results: [{ url: "...", anime_name: "..." }] }
-    if (response.data && response.data.results && response.data.results.length > 0) {
-      const gifUrl = response.data.results[0].url;
-      if (gifUrl) return gifUrl;
-    }
-
-    // If API returns unexpected format, use fallback
-    console.warn(`nekos.best: Unexpected response format for "${type}", using fallback`);
-    return getRandomFallback(type);
-  } catch (error) {
-    console.error(`nekos.best GIF API Error for "${type}":`, error.message);
-    return getRandomFallback(type);
+  if (response.data?.results?.length > 0 && response.data.results[0].url) {
+    return response.data.results[0].url;
   }
+
+  return null;
 }
 
 /**
- * Get a random fallback GIF
- * @param {string} type - The type of GIF
- * @returns {string} - URL of the fallback GIF
+ * Fetch GIF from purrbot API v2 (SECONDARY FALLBACK)
+ * Endpoint: GET https://api.purrbot.site/v2/img/sfw/{category}/gif
+ * Response: { link: "...", error: false }
+ */
+async function fetchFromPurrbot(type) {
+  const category = purrbotCategoryMap[type];
+  if (!category) return null; // purrbot doesn't support this category
+
+  const response = await axios.get(`${PURRBOT_BASE}/${category}/gif`, {
+    timeout: 6000
+  });
+
+  if (response.data?.link && !response.data.error) {
+    return response.data.link;
+  }
+
+  return null;
+}
+
+/**
+ * Get a random fallback GIF from hardcoded CDN URLs (TERTIARY)
  */
 function getRandomFallback(type) {
   const gifs = fallbackGifs[type];
   if (gifs && gifs.length > 0) {
     return gifs[Math.floor(Math.random() * gifs.length)];
   }
-  // Generic fallback - use a nekos.best hug as safe default
-  return 'https://nekos.best/api/v2/hug/0c0095a3-d0f5-4b4d-a33a-1e6b6e85e4ef.gif';
+  // Generic fallback
+  return 'https://cdn.purrbot.site/sfw/hug/gif/hug_028.gif';
 }
+
+// ============================================================
+// Main GIF Fetcher - Tries APIs in order
+// ============================================================
+
+/**
+ * Fetch a random GIF with automatic fallback chain
+ * 1. nekos.best (primary - user requested)
+ * 2. purrbot (secondary fallback)
+ * 3. Hardcoded CDN URLs (last resort)
+ *
+ * @param {string} type - The type of GIF (hug, slap, kiss, pat, etc.)
+ * @returns {Promise<string>} - URL of the GIF
+ */
+async function fetchGif(type) {
+  // Tier 1: Try nekos.best (user's preferred API)
+  try {
+    const url = await fetchFromNekosBest(type);
+    if (url) {
+      console.log(`[GIF] nekos.best: ${type} -> ${url}`);
+      return url;
+    }
+  } catch (error) {
+    console.warn(`[GIF] nekos.best failed for "${type}": ${error.message}`);
+  }
+
+  // Tier 2: Try purrbot as fallback
+  try {
+    const url = await fetchFromPurrbot(type);
+    if (url) {
+      console.log(`[GIF] purrbot fallback: ${type} -> ${url}`);
+      return url;
+    }
+  } catch (error) {
+    console.warn(`[GIF] purrbot fallback failed for "${type}": ${error.message}`);
+  }
+
+  // Tier 3: Use hardcoded CDN URL
+  const fallbackUrl = getRandomFallback(type);
+  console.log(`[GIF] Using hardcoded fallback: ${type} -> ${fallbackUrl}`);
+  return fallbackUrl;
+}
+
+// ============================================================
+// Embed Builder for Action Commands
+// ============================================================
 
 /**
  * Create an action embed with a random GIF
@@ -163,4 +280,4 @@ async function createActionEmbed({ title, description, color, gifType, footerTex
   return embed;
 }
 
-module.exports = { fetchGif, createActionEmbed, fallbackGifs, categoryMap };
+module.exports = { fetchGif, createActionEmbed, fallbackGifs, nekosCategoryMap, purrbotCategoryMap };

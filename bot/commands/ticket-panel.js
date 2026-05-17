@@ -31,6 +31,8 @@ module.exports = {
       })
       .setTimestamp();
 
+    const supportEmail = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
+
     const row = new ActionRowBuilder()
       .addComponents(
         new ButtonBuilder()
@@ -39,10 +41,10 @@ module.exports = {
           .setStyle(ButtonStyle.Primary)
           .setEmoji('🎫'),
         new ButtonBuilder()
-          .setURL(process.env.SUPPORT_SERVER_URL || 'https://discord.gg/yourserver')
-          .setLabel('Join Support Server')
+          .setURL(`mailto:${supportEmail}`)
+          .setLabel('Email Support')
           .setStyle(ButtonStyle.Link)
-          .setEmoji('🔗')
+          .setEmoji('📧')
       );
 
     try {
@@ -56,7 +58,7 @@ module.exports = {
         ephemeral: true
       });
     } catch (err) {
-      console.error('[Ticket-Panel] Error sending panel:', err.message);
+      console.error('[Ticket-Panel] Error:', err.message);
       await interaction.reply({
         content: `❌ Failed to send panel to ${targetChannel}. Check bot permissions.`,
         ephemeral: true
