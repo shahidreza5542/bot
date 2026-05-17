@@ -10,49 +10,26 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ticket-panel')
-    .setDescription('Send the ticket creation panel')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addChannelOption(option =>
-      option.setName('channel')
-        .setDescription('Channel to send panel')
-        .setRequired(false)
-    ),
+    .setDescription('Send ticket panel')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
-    const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
-
     const embed = new EmbedBuilder()
-      .setTitle('🎫 Support Center')
-      .setDescription('Click below to create a ticket.')
-      .setColor(0x00D4AA)
-      .setTimestamp();
+      .setTitle('🎫 Support Panel')
+      .setDescription('Click below to create ticket')
+      .setColor(0x00d4aa);
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId('ticket:create')
+        .setCustomId('ticket_create')
         .setLabel('Create Ticket')
         .setStyle(ButtonStyle.Primary)
-        .setEmoji('🎫'),
-
-      new ButtonBuilder()
-        .setLabel('Dashboard')
-        .setStyle(ButtonStyle.Link)
-        .setURL('https://toolmetry.vercel.app/tools')
+        .setEmoji('🎫')
     );
 
-    try {
-      await targetChannel.send({ embeds: [embed], components: [row] });
-
-      await interaction.reply({
-        content: `✅ Panel sent to ${targetChannel}`,
-        ephemeral: true
-      });
-    } catch (err) {
-      console.error(err);
-      await interaction.reply({
-        content: '❌ Failed to send panel',
-        ephemeral: true
-      });
-    }
+    await interaction.reply({
+      embeds: [embed],
+      components: [row]
+    });
   }
 };

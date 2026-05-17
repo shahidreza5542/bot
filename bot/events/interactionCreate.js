@@ -25,87 +25,68 @@ module.exports = {
       if (!interaction.isChatInputCommand()) return;
 
       const command = interaction.client.commands.get(interaction.commandName);
-
       if (!command) return;
 
       await command.execute(interaction);
 
-    } catch (error) {
-      console.error('Interaction error:', error);
+    } catch (err) {
+      console.error('Interaction Error:', err);
 
-      try {
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp({
-            content: '❌ Error executing command!',
-            ephemeral: true
-          });
-        } else {
-          await interaction.reply({
-            content: '❌ Error executing command!',
-            ephemeral: true
-          });
-        }
-      } catch (e) { }
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: '❌ Interaction failed',
+          ephemeral: true
+        }).catch(() => {});
+      }
     }
   }
 };
 
-
-// BUTTON HANDLER
-
+// ================= BUTTON ROUTER =================
 async function handleButton(interaction) {
   try {
-    const customId = interaction.customId;
+    const id = interaction.customId;
 
-    if (customId === 'ticket_create') {
+    // CREATE
+    if (id === 'ticket_create') {
       return await handleTicketCreate(interaction);
     }
 
-    if (!customId.startsWith('ticket:')) {
-      return await interaction.reply({
-        content: '❌ Unknown button action',
+    // VALIDATION
+    if (!id.includes(':')) {
+      return interaction.reply({
+        content: '❌ Old or invalid button detected. Recreate panel.',
         ephemeral: true
       });
     }
 
-    const parts = customId.split(':');
-    if (parts.length !== 3) {
-      return await interaction.reply({
+    const [prefix, action, ticketId] = id.split(':');
+
+    if (prefix !== 'ticket' || !action || !ticketId) {
+      return interaction.reply({
         content: '❌ Invalid button format',
         ephemeral: true
       });
     }
 
-    const [, action, ticketId] = parts;
-
-    return await handleTicketAction(interaction, action, ticketId);
+    return handleTicketAction(interaction, action, ticketId);
 
   } catch (err) {
-    console.error('Button handler error:', err);
-
-    if (!interaction.replied) {
-      await interaction.reply({
-        content: '❌ Button error occurred',
-        ephemeral: true
-      });
-    }
+    console.error('Button Error:', err);
   }
 }
 
-// CREATE TICKET
-
+// ================= CREATE TICKET =================
 async function handleTicketCreate(interaction) {
   const guild = interaction.guild;
   const user = interaction.user;
 
   try {
     await interaction.deferReply({ ephemeral: true });
-  } catch (err) {
-    console.error('Defer failed:', err);
+  } catch {
     return;
   }
 
-  // check existing ticket
   const existing = [...tickets.values()].find(
     t => t.userId === user.id && t.guildId === guild.id && t.status === 'open'
   );
@@ -113,12 +94,11 @@ async function handleTicketCreate(interaction) {
   if (existing) {
     const ch = guild.channels.cache.get(existing.channelId);
     return interaction.editReply({
-      content: ch ? `❌ Already open: ${ch}` : '❌ You already have a ticket'
+      content: ch ? `❌ Already open: ${ch}` : '❌ Ticket already exists'
     });
   }
 
-  const ticketNumber = Date.now();
-  const ticketId = `TICKET-${ticketNumber}`;
+  const ticketId = `TICKET-${Date.now()}`;
 
   let channel;
 
@@ -128,10 +108,13 @@ async function handleTicketCreate(interaction) {
       await guild.members.fetch(interaction.client.user.id).catch(() => null);
 
     channel = await guild.channels.create({
-      name: `ticket-${ticketNumber}`,
+      name: `ticket-${Date.now()}`,
       type: ChannelType.GuildText,
       permissionOverwrites: [
-        { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+        {
+          id: guild.id,
+          deny: [PermissionFlagsBits.ViewChannel]
+        },
         {
           id: user.id,
           allow: [
@@ -142,13 +125,13 @@ async function handleTicketCreate(interaction) {
         },
         botMember
           ? {
-            id: botMember.id,
-            allow: [
-              PermissionFlagsBits.ViewChannel,
-              PermissionFlagsBits.SendMessages,
-              PermissionFlagsBits.ManageChannels
-            ]
-          }
+              id: botMember.id,
+              allow: [
+                PermissionFlagsBits.ViewChannel,
+                PermissionFlagsBits.SendMessages,
+                PermissionFlagsBits.ManageChannels
+              ]
+            }
           : null
       ].filter(Boolean)
     });
@@ -170,7 +153,7 @@ async function handleTicketCreate(interaction) {
   saveTickets();
 
   const embed = new EmbedBuilder()
-    .setTitle(`🎫 Ticket`)
+    .setTitle('🎫 Support Ticket')
     .setDescription(`User: ${user.tag}`)
     .setColor(0x00d4aa);
 
@@ -193,12 +176,12 @@ async function handleTicketCreate(interaction) {
 
   await channel.send({ content: `${user}`, embeds: [embed], components: [row] });
 
-  return interaction.editReply({ content: `✅ Ticket created: ${channel}` });
+  return interaction.editReply({
+    content: `✅ Ticket created: ${channel}`
+  });
 }
 
-
-// ACTION HANDLER
-
+// ================= ACTION HANDLER =================
 async function handleTicketAction(interaction, action, ticketId) {
   let ticket = tickets.get(ticketId);
 
@@ -206,9 +189,7 @@ async function handleTicketAction(interaction, action, ticketId) {
     try {
       reloadTickets();
       ticket = tickets.get(ticketId);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {}
   }
 
   if (!ticket) {
@@ -222,37 +203,58 @@ async function handleTicketAction(interaction, action, ticketId) {
   const member = interaction.member;
   const user = interaction.user;
 
+  // CLAIM
   if (action === 'claim') {
     if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-      return interaction.reply({ content: '❌ No permission', ephemeral: true });
+      return interaction.reply({
+        content: '❌ No permission',
+        ephemeral: true
+      });
     }
 
     ticket.claimedBy = user.id;
     saveTickets();
 
     await channel.send(`👋 Claimed by ${user.tag}`);
-    return interaction.reply({ content: '✅ Claimed', ephemeral: true });
+
+    return interaction.reply({
+      content: '✅ Claimed',
+      ephemeral: true
+    });
   }
 
+  // CLOSE
   if (action === 'close') {
     ticket.status = 'closed';
     saveTickets();
 
     await channel.send(`🔒 Closed by ${user.tag}`);
-    return interaction.reply({ content: '✅ Closed', ephemeral: true });
+
+    return interaction.reply({
+      content: '✅ Closed',
+      ephemeral: true
+    });
   }
 
+  // DELETE
   if (action === 'delete') {
     if (!member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-      return interaction.reply({ content: '❌ No permission', ephemeral: true });
+      return interaction.reply({
+        content: '❌ No permission',
+        ephemeral: true
+      });
     }
 
-    await interaction.reply({ content: '🗑️ Deleting...', ephemeral: true });
+    await interaction.reply({
+      content: '🗑️ Deleting ticket...',
+      ephemeral: true
+    });
 
     setTimeout(async () => {
       try {
         await channel.delete();
-      } catch { }
+      } catch {}
+
       tickets.delete(ticketId);
       saveTickets();
     }, 2000);
