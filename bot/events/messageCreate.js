@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { levelStorage } = require('../utils/localStorage');
-// ticketStorage no longer exports a tickets Map - not needed here
+const { tickets } = require('../utils/ticketStorage');
 
 // Load training data
 let knowledgeBase = {};

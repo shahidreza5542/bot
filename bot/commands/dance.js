@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { createActionEmbed } = require('../utils/gifApi');
 
 module.exports = {
@@ -6,21 +6,26 @@ module.exports = {
     .setName('dance')
     .setDescription('Dance with someone or show off your moves!')
     .addUserOption(option =>
-      option.setName('user').setDescription('User to dance with').setRequired(false)),
+      option
+        .setName('user')
+        .setDescription('User to dance with')
+        .setRequired(false)),
 
   async execute(interaction) {
-    const target = interaction.options.getUser('user');
+    const targetUser = interaction.options.getUser('user');
+
     const embed = await createActionEmbed({
       title: '💃 Dance!',
-      description: target
-        ? `<@${interaction.user.id}> is dancing with <@${target.id}>! Groovy!`
-        : `<@${interaction.user.id}> is showing off their dance moves!`,
+      description: targetUser
+        ? `**${interaction.user.username}** is dancing with **${targetUser.username}**! Groovy!`
+        : `**${interaction.user.username}** is showing off their dance moves!`,
       color: 0xFF69B4,
       gifType: 'dance',
-      footerText: target
-        ? `${interaction.user.username} danced with ${target.username}`
+      footerText: targetUser
+        ? `${interaction.user.username} danced with ${targetUser.username}`
         : `${interaction.user.username} danced`
     });
-    await interaction.reply({ content: target ? `<@${target.id}>` : undefined, embeds: [embed] });
+
+    await interaction.reply({ embeds: [embed] });
   }
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { createActionEmbed } = require('../utils/gifApi');
 
 module.exports = {
@@ -6,20 +6,26 @@ module.exports = {
     .setName('tickle')
     .setDescription('Tickle someone until they laugh!')
     .addUserOption(option =>
-      option.setName('user').setDescription('User to tickle').setRequired(true)),
+      option
+        .setName('user')
+        .setDescription('User to tickle')
+        .setRequired(true)),
 
   async execute(interaction) {
-    const target = interaction.options.getUser('user');
-    if (target.id === interaction.user.id) {
+    const targetUser = interaction.options.getUser('user');
+
+    if (targetUser.id === interaction.user.id) {
       return interaction.reply({ content: 'You tickled yourself! Hahaha! 🪶', ephemeral: true });
     }
+
     const embed = await createActionEmbed({
       title: '🪶 Tickle!',
-      description: `<@${interaction.user.id}> tickled <@${target.id}>! Hahaha!`,
+      description: `**${interaction.user.username}** tickled **${targetUser.username}**! Hahaha!`,
       color: 0x98FB98,
       gifType: 'tickle',
-      footerText: `${interaction.user.username} tickled ${target.username}`
+      footerText: `${interaction.user.username} tickled ${targetUser.username}`
     });
-    await interaction.reply({ content: `<@${target.id}>`, embeds: [embed] });
+
+    await interaction.reply({ embeds: [embed] });
   }
 };

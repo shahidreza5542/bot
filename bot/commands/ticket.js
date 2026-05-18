@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ChannelType } = require('discord.js');
-const ticketStorage = require('../utils/ticketStorage');
+const { tickets, saveTickets, getNextTicketNumber } = require('../utils/ticketStorage');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -17,32 +17,29 @@ module.exports = {
     const user = interaction.user;
 
     // Check for existing open ticket
-    const existing = ticketStorage.getOpenTicket(guild.id, user.id);
-    if (existing) {
-      const existingChannel = guild.channels.cache.get(existing.channelId);
-      if (existingChannel) {
-        return interaction.reply({
-          content: `❌ You already have an open ticket: ${existingChannel}`,
-          ephemeral: true
-        });
-      } else {
-        // Channel was deleted - clean up stale ticket
-        ticketStorage.updateTicket(existing.ticketId, { status: 'closed' });
+    for (const [id, ticket] of tickets) {
+      if (ticket.userId === user.id && ticket.guildId === guild.id && ticket.status === 'open') {
+        const existingChannel = guild.channels.cache.get(ticket.channelId);
+        if (existingChannel) {
+          return interaction.reply({
+            content: `❌ You already have an open ticket: ${existingChannel}`,
+            ephemeral: true
+          });
+        } else {
+          // Channel was deleted but ticket still exists - clean it up
+          ticket.status = 'closed';
+          saveTickets();
+        }
       }
     }
 
-    // Create ticket in storage first (to get the number)
-    const ticket = ticketStorage.createTicket({
-      guildId: guild.id,
-      userId: user.id,
-      username: user.username,
-      subject
-    });
-
-    const channelName = `ticket-${ticket.ticketNumber.toString().padStart(4, '0')}`;
+    const ticketNumber = getNextTicketNumber();
+    const channelName = `ticket-${ticketNumber.toString().padStart(4, '0')}`;
 
     try {
+      // Get bot member for permissions
       const botMember = guild.members.me;
+
       const permissionOverwrites = [
         { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
         { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory] }
@@ -61,15 +58,27 @@ module.exports = {
         permissionOverwrites
       });
 
-      // Update storage with channel ID
-      ticketStorage.updateTicket(ticket.ticketId, { channelId: ticketChannel.id });
+      const ticketId = `TICKET-${ticketNumber}`;
+      tickets.set(ticketId, {
+        ticketId,
+        guildId: guild.id,
+        channelId: ticketChannel.id,
+        userId: user.id,
+        username: user.username,
+        subject,
+        status: 'open',
+        claimedBy: null,
+        createdAt: new Date().toISOString()
+      });
+
+      saveTickets();
 
       const embed = new EmbedBuilder()
-        .setTitle(`🎫 Ticket #${ticket.ticketNumber}`)
+        .setTitle(`🎫 Ticket #${ticketNumber}`)
         .setDescription(
           `**Welcome to Support!**\n\n` +
           `**Subject:** ${subject}\n` +
-          `**User:** <@${user.id}>\n` +
+          `**User:** ${user.tag}\n` +
           `**Created:** <t:${Math.floor(Date.now() / 1000)}:R>\n\n` +
           `Describe your issue below. Our team will respond shortly!`
         )
@@ -81,23 +90,23 @@ module.exports = {
       const row = new ActionRowBuilder()
         .addComponents(
           new ButtonBuilder()
-            .setCustomId(`t_claim_${ticket.ticketId}`)
+            .setCustomId(`ticket_claim_${ticketId}`)
             .setLabel('Claim')
             .setStyle(ButtonStyle.Success)
             .setEmoji('👋'),
           new ButtonBuilder()
-            .setCustomId(`t_close_${ticket.ticketId}`)
+            .setCustomId(`ticket_close_${ticketId}`)
             .setLabel('Close')
             .setStyle(ButtonStyle.Danger)
             .setEmoji('🔒'),
           new ButtonBuilder()
-            .setCustomId(`t_del_${ticket.ticketId}`)
+            .setCustomId(`ticket_delete_${ticketId}`)
             .setLabel('Delete')
             .setStyle(ButtonStyle.Secondary)
             .setEmoji('🗑️')
         );
 
-      await ticketChannel.send({ content: `<@${user.id}>`, embeds: [embed], components: [row] });
+      await ticketChannel.send({ content: `${user}`, embeds: [embed], components: [row] });
 
       await interaction.reply({
         content: `✅ Ticket created: ${ticketChannel}`,
@@ -105,12 +114,14 @@ module.exports = {
       });
     } catch (err) {
       console.error('[Ticket] Create error:', err.message);
-      // Delete the stored ticket since channel creation failed
-      ticketStorage.deleteTicket(ticket.ticketId);
       await interaction.reply({
-        content: `❌ Failed to create ticket channel. Check bot permissions.\nError: ${err.message}`,
+        content: `❌ Failed to create ticket: ${err.message || 'Check bot permissions and try again.'}`,
         ephemeral: true
       });
     }
   }
 };
+
+// Export for use in interactionCreate.js
+module.exports.tickets = tickets;
+module.exports.saveTickets = saveTickets;

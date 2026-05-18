@@ -2,104 +2,81 @@ const fs = require('fs');
 const path = require('path');
 
 // ============================================================
-// Ticket Storage - Simple JSON file based
-// No database, no complexity
+// Shared Ticket Storage Module
+// Separate module to avoid any circular dependency or
+// module loading order issues between ticket.js and
+// interactionCreate.js
 // ============================================================
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const TICKETS_FILE = path.join(DATA_DIR, 'tickets.json');
+const TICKETS_FILE = path.join(__dirname, '../data/tickets.json');
+const DATA_DIR = path.join(__dirname, '../data');
 
-// Make sure data dir exists
+// Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// Initialize file if it doesn't exist
-if (!fs.existsSync(TICKETS_FILE)) {
-  fs.writeFileSync(TICKETS_FILE, JSON.stringify({ tickets: {}, counter: 0 }, null, 2));
-}
+// In-memory ticket store
+const tickets = new Map();
+let ticketCounter = 0;
 
-// Read raw data from file
-function readData() {
+// Load tickets from disk on startup
+function loadTickets() {
   try {
-    return JSON.parse(fs.readFileSync(TICKETS_FILE, 'utf8'));
-  } catch {
-    return { tickets: {}, counter: 0 };
+    if (fs.existsSync(TICKETS_FILE)) {
+      const raw = fs.readFileSync(TICKETS_FILE, 'utf8');
+      const data = JSON.parse(raw);
+      let maxCounter = 0;
+
+      for (const [key, value] of Object.entries(data.tickets || {})) {
+        tickets.set(key, value);
+        const num = parseInt(key.split('-')[1]);
+        if (!isNaN(num) && num > maxCounter) maxCounter = num;
+      }
+
+      ticketCounter = maxCounter;
+      console.log(`[TicketStorage] Loaded ${tickets.size} tickets, counter: ${ticketCounter}`);
+      return true;
+    }
+  } catch (err) {
+    console.error('[TicketStorage] Load error:', err.message);
   }
+  return false;
 }
 
-// Write raw data to file
-function writeData(data) {
+// Save tickets to disk
+function saveTickets() {
   try {
-    fs.writeFileSync(TICKETS_FILE, JSON.stringify(data, null, 2));
+    const obj = Object.fromEntries(tickets);
+    fs.writeFileSync(TICKETS_FILE, JSON.stringify({ tickets: obj, lastUpdated: new Date().toISOString() }, null, 2));
     return true;
   } catch (err) {
-    console.error('[TicketStorage] Write error:', err.message);
+    console.error('[TicketStorage] Save error:', err.message);
     return false;
   }
 }
 
-// Get all tickets as an object
-function getAllTickets() {
-  return readData().tickets;
+// Reload tickets from disk (for recovery after restart)
+function reloadTickets() {
+  tickets.clear();
+  ticketCounter = 0;
+  return loadTickets();
 }
 
-// Get a single ticket by ID
-function getTicket(ticketId) {
-  const data = readData();
-  return data.tickets[ticketId] || null;
+// Get next ticket number
+function getNextTicketNumber() {
+  ticketCounter++;
+  return ticketCounter;
 }
 
-// Get open ticket for a user in a guild
-function getOpenTicket(guildId, userId) {
-  const data = readData();
-  for (const [id, ticket] of Object.entries(data.tickets)) {
-    if (ticket.guildId === guildId && ticket.userId === userId && ticket.status === 'open') {
-      return { id, ...ticket };
-    }
-  }
-  return null;
-}
-
-// Create a new ticket
-function createTicket(ticketData) {
-  const data = readData();
-  data.counter++;
-  const ticketId = `TICKET-${data.counter}`;
-  data.tickets[ticketId] = {
-    ...ticketData,
-    ticketId,
-    status: 'open',
-    claimedBy: null,
-    createdAt: new Date().toISOString()
-  };
-  writeData(data);
-  return { ticketId, ticketNumber: data.counter, ...data.tickets[ticketId] };
-}
-
-// Update a ticket
-function updateTicket(ticketId, updates) {
-  const data = readData();
-  if (!data.tickets[ticketId]) return false;
-  data.tickets[ticketId] = { ...data.tickets[ticketId], ...updates };
-  writeData(data);
-  return true;
-}
-
-// Delete a ticket
-function deleteTicket(ticketId) {
-  const data = readData();
-  if (!data.tickets[ticketId]) return false;
-  delete data.tickets[ticketId];
-  writeData(data);
-  return true;
-}
+// Initialize on load
+loadTickets();
 
 module.exports = {
-  getAllTickets,
-  getTicket,
-  getOpenTicket,
-  createTicket,
-  updateTicket,
-  deleteTicket
+  tickets,
+  saveTickets,
+  loadTickets,
+  reloadTickets,
+  getNextTicketNumber,
+  TICKETS_FILE
 };

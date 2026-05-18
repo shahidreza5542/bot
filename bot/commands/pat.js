@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { createActionEmbed } = require('../utils/gifApi');
 
 module.exports = {
@@ -6,20 +6,26 @@ module.exports = {
     .setName('pat')
     .setDescription('Pat someone on the head!')
     .addUserOption(option =>
-      option.setName('user').setDescription('User to pat').setRequired(true)),
+      option
+        .setName('user')
+        .setDescription('User to pat')
+        .setRequired(true)),
 
   async execute(interaction) {
-    const target = interaction.options.getUser('user');
-    if (target.id === interaction.user.id) {
+    const targetUser = interaction.options.getUser('user');
+
+    if (targetUser.id === interaction.user.id) {
       return interaction.reply({ content: 'You patted yourself! Good job! 🥺', ephemeral: true });
     }
+
     const embed = await createActionEmbed({
       title: '🥺 Pat!',
-      description: `<@${interaction.user.id}> patted <@${target.id}> on the head!`,
+      description: `**${interaction.user.username}** patted **${targetUser.username}** on the head!`,
       color: 0xFFB6C1,
       gifType: 'pat',
-      footerText: `${interaction.user.username} patted ${target.username}`
+      footerText: `${interaction.user.username} patted ${targetUser.username}`
     });
-    await interaction.reply({ content: `<@${target.id}>`, embeds: [embed] });
+
+    await interaction.reply({ embeds: [embed] });
   }
 };
