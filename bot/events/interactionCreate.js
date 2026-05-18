@@ -200,9 +200,7 @@ async function btnCreateTicket(interaction) {
   return await safeReply(interaction, `✅ Ticket created: ${ticketChannel}`);
 }
 
-// ============================================================
-// CLAIM TICKET
-// ============================================================
+
 async function btnClaim(interaction, ticketId) {
   // Defer first
   try { await interaction.deferReply({ ephemeral: true }); } catch (e) { return; }
