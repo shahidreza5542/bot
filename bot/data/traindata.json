@@ -1,0 +1,46 @@
+{
+  "knowledgeBase": {
+    "greeting": {
+      "patterns": ["hello", "hi", "hey", "good morning", "good evening", "howdy", "sup", "yo"],
+      "responses": {
+        "en": "Hello! Welcome to our server! How can I help you today?"
+      }
+    },
+    "help": {
+      "patterns": ["help", "i need help", "can you help", "support", "assist"],
+      "responses": {
+        "en": "I'd be happy to help! Please describe your issue and our team will assist you as soon as possible."
+      }
+    },
+    "bot_info": {
+      "patterns": ["what is toolmetry", "who are you", "about bot", "bot info", "what can you do"],
+      "responses": {
+        "en": "I'm Toolmetry AI Bot! I can help with moderation, fun commands with GIFs, tickets, leveling, and much more. Use /help to see all commands!"
+      }
+    },
+    "ticket_help": {
+      "patterns": ["create ticket", "open ticket", "how to create ticket", "ticket support"],
+      "responses": {
+        "en": "You can create a ticket by clicking the 'Create Ticket' button in the ticket panel, or by using /ticket create <subject> command."
+      }
+    },
+    "thanks": {
+      "patterns": ["thank you", "thanks", "thx", "appreciate it", "ty"],
+      "responses": {
+        "en": "You're welcome! If you need anything else, feel free to ask!"
+      }
+    },
+    "bug_report": {
+      "patterns": ["bug", "error", "not working", "broken", "issue", "problem"],
+      "responses": {
+        "en": "I'm sorry you're experiencing issues. Please create a ticket with details about the bug, and our team will look into it right away."
+      }
+    },
+    "feature_request": {
+      "patterns": ["feature request", "suggestion", "add this", "new feature", "idea"],
+      "responses": {
+        "en": "Great idea! Please create a ticket with your feature request, and our development team will consider it."
+      }
+    }
+  }
+}
