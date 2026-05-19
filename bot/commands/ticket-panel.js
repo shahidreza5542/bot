@@ -20,6 +20,7 @@ module.exports = {
       }
 
       const avatarURL = interaction.client.user.displayAvatarURL({ size: 256 });
+      const supportEmail = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
 
       const embed = new EmbedBuilder()
         .setTitle('Support Center')
@@ -28,26 +29,20 @@ module.exports = {
           'Click the button below to create a support ticket.\n\n' +
           '**Fast response times**\n' +
           '**Professional support**\n' +
-          '**AI-powered assistance**'
+          '**AI-powered assistance**\n\n' +
+          `Email: ${supportEmail}`
         )
         .setColor(0x00D4AA)
         .setThumbnail(avatarURL)
         .setFooter({ text: 'Toolmetry AI Support System', iconURL: avatarURL })
         .setTimestamp();
 
-      const supportEmail = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
-
       const createButton = new ButtonBuilder()
         .setCustomId('ticket_create')
         .setLabel('Create Ticket')
         .setStyle(ButtonStyle.Primary);
 
-      const emailButton = new ButtonBuilder()
-        .setURL(`mailto:${supportEmail}`)
-        .setLabel('Email Support')
-        .setStyle(ButtonStyle.Link);
-
-      const row = new ActionRowBuilder().addComponents(createButton, emailButton);
+      const row = new ActionRowBuilder().addComponents(createButton);
 
       await targetChannel.send({ embeds: [embed], components: [row] });
 
