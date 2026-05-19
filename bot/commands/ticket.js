@@ -30,18 +30,10 @@ module.exports = {
   async execute(interaction) {
     const subcommand = interaction.options.getSubcommand();
 
-    if (subcommand === 'create') {
-      return await createTicket(interaction);
-    }
-    if (subcommand === 'close') {
-      return await closeTicket(interaction);
-    }
-    if (subcommand === 'claim') {
-      return await claimTicket(interaction);
-    }
-    if (subcommand === 'delete') {
-      return await deleteTicket(interaction);
-    }
+    if (subcommand === 'create') return await createTicket(interaction);
+    if (subcommand === 'close') return await closeTicket(interaction);
+    if (subcommand === 'claim') return await claimTicket(interaction);
+    if (subcommand === 'delete') return await deleteTicket(interaction);
   }
 };
 
@@ -87,7 +79,7 @@ async function createTicket(interaction) {
       permissionOverwrites
     });
   } catch (err) {
-    console.error('[Ticket] Channel create error:', err.message);
+    console.error('Ticket channel create error:', err.message);
     return await interaction.editReply({ content: `Failed to create ticket channel: ${err.message}` });
   }
 
@@ -114,28 +106,15 @@ async function createTicket(interaction) {
       `Describe your issue below. Our team will respond shortly!`
     )
     .setColor(0x00D4AA)
-    .setThumbnail(user.displayAvatarURL())
+    .setThumbnail(user.displayAvatarURL({ size: 128 }))
     .setFooter({ text: 'Toolmetry AI Ticket System' })
     .setTimestamp();
 
-  const row = new ActionRowBuilder()
-    .addComponents(
-      new ButtonBuilder()
-        .setCustomId(`ticket_claim_${ticketId}`)
-        .setLabel('Claim')
-        .setStyle(ButtonStyle.Success)
-        .setEmoji('👋'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_close_${ticketId}`)
-        .setLabel('Close')
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('🔒'),
-      new ButtonBuilder()
-        .setCustomId(`ticket_delete_${ticketId}`)
-        .setLabel('Delete')
-        .setStyle(ButtonStyle.Secondary)
-        .setEmoji('🗑️')
-    );
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`ticket_claim_${ticketId}`).setLabel('Claim').setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId(`ticket_close_${ticketId}`).setLabel('Close').setStyle(ButtonStyle.Danger),
+    new ButtonBuilder().setCustomId(`ticket_delete_${ticketId}`).setLabel('Delete').setStyle(ButtonStyle.Secondary)
+  );
 
   await ticketChannel.send({ content: `<@${user.id}>`, embeds: [embed], components: [row] });
   await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
@@ -187,19 +166,13 @@ async function closeTicket(interaction) {
 
       await panelMsg.edit({ embeds: [closed], components: [] });
     }
-  } catch (editErr) {
-    console.warn('[Ticket] Embed update failed:', editErr.message);
-  }
+  } catch (editErr) {}
 
   await channel.send(`Ticket closed by <@${user.id}>. Channel will be deleted in 30 seconds.`);
   await interaction.editReply({ content: 'Ticket closed. Channel will be deleted in 30 seconds.' });
 
   setTimeout(async () => {
-    try {
-      await channel.delete('Ticket closed - auto delete');
-    } catch (err) {
-      console.error('[Ticket] Auto-delete error:', err.message);
-    }
+    try { await channel.delete('Ticket closed - auto delete'); } catch (err) {}
     removeTicket(ticketData.id);
   }, 30000);
 }
@@ -250,9 +223,7 @@ async function claimTicket(interaction) {
 
       await panelMsg.edit({ embeds: [updated], components: panelMsg.components });
     }
-  } catch (editErr) {
-    console.warn('[Ticket] Embed update failed:', editErr.message);
-  }
+  } catch (editErr) {}
 
   await channel.send(`<@${user.id}> claimed this ticket!`);
   await interaction.editReply({ content: 'You claimed this ticket!' });
@@ -273,11 +244,7 @@ async function deleteTicket(interaction) {
   await interaction.editReply({ content: 'Deleting ticket...' });
 
   setTimeout(async () => {
-    try {
-      await channel.delete('Ticket deleted by staff');
-    } catch (err) {
-      console.error('[Ticket] Channel delete error:', err.message);
-    }
+    try { await channel.delete('Ticket deleted by staff'); } catch (err) {}
     if (ticketData) removeTicket(ticketData.id);
   }, 2000);
 }

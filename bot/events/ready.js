@@ -13,6 +13,6 @@ module.exports = {
       type: ActivityType.Playing
     });
 
-    console.log('Bot is fully ready!');
+    console.log('Bot is fully ready');
   }
 };

@@ -57,17 +57,13 @@ async function fetchFromPurrbot(type) {
   const category = purrbotCategoryMap[type];
   if (!category) return null;
   const response = await axios.get(`${PURRBOT_BASE}/${category}/gif`, { timeout: 6000 });
-  if (response.data?.link && !response.data.error) {
-    return response.data.link;
-  }
+  if (response.data?.link && !response.data.error) return response.data.link;
   return null;
 }
 
 function getRandomFallback(type) {
   const gifs = fallbackGifs[type];
-  if (gifs && gifs.length > 0) {
-    return gifs[Math.floor(Math.random() * gifs.length)];
-  }
+  if (gifs && gifs.length > 0) return gifs[Math.floor(Math.random() * gifs.length)];
   return 'https://cdn.purrbot.site/sfw/hug/gif/hug_028.gif';
 }
 
@@ -76,14 +72,14 @@ async function fetchGif(type) {
     const url = await fetchFromNekosBest(type);
     if (url) return url;
   } catch (error) {
-    console.warn(`[GIF] nekos.best failed for "${type}": ${error.message}`);
+    console.warn(`GIF nekos.best failed "${type}": ${error.message}`);
   }
 
   try {
     const url = await fetchFromPurrbot(type);
     if (url) return url;
   } catch (error) {
-    console.warn(`[GIF] purrbot fallback failed for "${type}": ${error.message}`);
+    console.warn(`GIF purrbot failed "${type}": ${error.message}`);
   }
 
   return getRandomFallback(type);
@@ -103,4 +99,4 @@ async function createActionEmbed({ title, description, color, gifType, footerTex
   return embed;
 }
 
-module.exports = { fetchGif, createActionEmbed, fallbackGifs, nekosCategoryMap, purrbotCategoryMap };
+module.exports = { fetchGif, createActionEmbed };

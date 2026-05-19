@@ -9,7 +9,7 @@ try {
 }
 
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
-const fallbackResponse = `I'm not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email ${SUPPORT_EMAIL}`;
+const fallbackResponse = `I am not sure about that specific query. Let me tag our support team to help you!\n\nMeanwhile, you can check our Help Center or email ${SUPPORT_EMAIL}`;
 
 const userActivity = new Map();
 const lastRoasted = new Map();
@@ -26,9 +26,7 @@ const SPAM_CONFIG = {
 const STAFF_ROLE_IDS = process.env.STAFF_ROLE_IDS ? process.env.STAFF_ROLE_IDS.split(',') : [];
 const OWNER_ID = process.env.OWNER_ID || '';
 
-setInterval(() => {
-  processedMessages.clear();
-}, 5 * 60 * 1000);
+setInterval(() => { processedMessages.clear(); }, 5 * 60 * 1000);
 
 function matchQuery(message) {
   const msg = message.toLowerCase().trim();
@@ -41,25 +39,18 @@ function matchQuery(message) {
     for (const pattern of data.patterns) {
       const patternLower = pattern.toLowerCase().trim();
 
-      if (msg === patternLower) {
-        return key;
-      }
+      if (msg === patternLower) return key;
 
       if (msg.includes(patternLower) && patternLower.length > 3) {
         const score = patternLower.length / msg.length;
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = key;
-        }
+        if (score > bestScore) { bestScore = score; bestMatch = key; }
       }
 
       const patternWords = patternLower.split(/\s+/);
       if (patternWords.length >= 2) {
         let matchedCount = 0;
         for (const pw of patternWords) {
-          if (pw.length > 3 && words.includes(pw)) {
-            matchedCount++;
-          }
+          if (pw.length > 3 && words.includes(pw)) matchedCount++;
         }
         const score = matchedCount / patternWords.length;
         if (score >= CONFIDENCE_THRESHOLD && score > bestScore) {
@@ -75,24 +66,22 @@ function matchQuery(message) {
 
 function generateRoast(username) {
   const roasts = [
-    "has been so quiet, we thought they were a ghost!",
-    "is so inactive, even snails are racing past them!",
-    "finally showed up! We missed your silence!",
-    "must be practicing to be invisible!",
-    "is so quiet, library rules don't apply to them!",
-    "has mastered the art of ninja-level silence!"
+    'has been so quiet, we thought they were a ghost!',
+    'is so inactive, even snails are racing past them!',
+    'finally showed up! We missed your silence!',
+    'must be practicing to be invisible!',
+    'is so quiet, library rules do not apply to them!',
+    'has mastered the art of ninja-level silence!'
   ];
   return roasts[Math.floor(Math.random() * roasts.length)];
 }
 
 function generateSupportResponse(userMessage) {
   const matchedKey = matchQuery(userMessage);
-
   if (matchedKey) {
     const response = knowledgeBase[matchedKey].responses.en || knowledgeBase[matchedKey].responses;
     return { response, isKnown: true };
   }
-
   return { response: fallbackResponse, isKnown: false };
 }
 
@@ -118,14 +107,13 @@ module.exports = {
     if (message.author.bot) return;
 
     const userId = message.author.id;
-    const guildId = message.guild?.id;
     const now = Date.now();
     const channelName = message.channel.name;
 
     userActivity.set(userId, now);
 
-    const isTicketChannel = channelName.startsWith('ticket-');
-    const isAISupportChannel = channelName === 'ai-support' || channelName.includes('ai-support');
+    const isTicketChannel = channelName?.startsWith('ticket-');
+    const isAISupportChannel = channelName === 'ai-support' || channelName?.includes('ai-support');
 
     if (isTicketChannel || isAISupportChannel) {
       if (processedMessages.has(message.id)) return;
@@ -175,34 +163,34 @@ module.exports = {
     }
 
     if (message.guild && Math.random() < 0.1) {
-      const members = await message.guild.members.fetch();
-      const inactiveUsers = [];
+      try {
+        const members = await message.guild.members.fetch();
+        const inactiveUsers = [];
 
-      for (const [memberId, member] of members) {
-        if (member.user.bot || memberId === userId) continue;
-
-        const lastActive = userActivity.get(memberId);
-        const lastRoast = lastRoasted.get(memberId) || 0;
-
-        if (lastActive && (now - lastActive) > 30 * 60 * 1000 && (now - lastRoast) > 2 * 60 * 60 * 1000) {
-          inactiveUsers.push(member);
+        for (const [memberId, member] of members) {
+          if (member.user.bot || memberId === userId) continue;
+          const lastActive = userActivity.get(memberId);
+          const lastRoast = lastRoasted.get(memberId) || 0;
+          if (lastActive && (now - lastActive) > 30 * 60 * 1000 && (now - lastRoast) > 2 * 60 * 60 * 1000) {
+            inactiveUsers.push(member);
+          }
         }
-      }
 
-      if (inactiveUsers.length > 0) {
-        const target = inactiveUsers[Math.floor(Math.random() * inactiveUsers.length)];
-        const roastText = generateRoast(target.user.username);
+        if (inactiveUsers.length > 0) {
+          const target = inactiveUsers[Math.floor(Math.random() * inactiveUsers.length)];
+          const roastText = generateRoast(target.user.username);
 
-        const embed = new EmbedBuilder()
-          .setTitle('Inactivity Roast!')
-          .setDescription(`${target.user} ${roastText}`)
-          .setColor(0xFF4500)
-          .setFooter({ text: 'Toolmetry AI Bot' })
-          .setTimestamp();
+          const embed = new EmbedBuilder()
+            .setTitle('Inactivity Roast!')
+            .setDescription(`${target.user} ${roastText}`)
+            .setColor(0xFF4500)
+            .setFooter({ text: 'Toolmetry AI Bot' })
+            .setTimestamp();
 
-        await message.channel.send({ embeds: [embed] });
-        lastRoasted.set(target.user.id, now);
-      }
+          await message.channel.send({ embeds: [embed] });
+          lastRoasted.set(target.user.id, now);
+        }
+      } catch (err) {}
     }
 
     if (message.guild) {

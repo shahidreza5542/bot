@@ -72,12 +72,7 @@ const warningStorage = {
     const data = readData(FILES.warnings);
     const key = `${guildId}-${userId}`;
     if (!data[key]) data[key] = [];
-    data[key].push({
-      ...warning,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      active: true
-    });
+    data[key].push({ ...warning, id: Date.now().toString(), createdAt: new Date().toISOString(), active: true });
     writeData(FILES.warnings, data);
     return data[key];
   },
@@ -86,10 +81,7 @@ const warningStorage = {
     const key = `${guildId}-${userId}`;
     if (data[key]) {
       const warning = data[key].find(w => w.id === warningId);
-      if (warning) {
-        warning.active = false;
-        writeData(FILES.warnings, data);
-      }
+      if (warning) { warning.active = false; writeData(FILES.warnings, data); }
     }
     return data[key] || [];
   },
@@ -110,21 +102,14 @@ const banStorage = {
   add(ban) {
     const data = readData(FILES.bans);
     const id = Date.now().toString();
-    data[id] = {
-      ...ban,
-      id,
-      createdAt: new Date().toISOString(),
-      active: true
-    };
+    data[id] = { ...ban, id, createdAt: new Date().toISOString(), active: true };
     writeData(FILES.bans, data);
     return data[id];
   },
   get(guildId, userId) {
     const data = readData(FILES.bans);
     for (const ban of Object.values(data)) {
-      if (ban.guildId === guildId && ban.userId === userId && ban.active) {
-        return ban;
-      }
+      if (ban.guildId === guildId && ban.userId === userId && ban.active) return ban;
     }
     return null;
   },

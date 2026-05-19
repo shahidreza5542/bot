@@ -12,47 +12,61 @@ module.exports = {
         .setRequired(false)),
 
   async execute(interaction) {
-    const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
-
-    const embed = new EmbedBuilder()
-      .setTitle('Support Center')
-      .setDescription(
-        '**Need help? We\'re here for you!**\n\n' +
-        'Click the button below to create a support ticket.\n\n' +
-        '**Fast response times**\n' +
-        '**Professional support**\n' +
-        '**AI-powered assistance**'
-      )
-      .setColor(0x00D4AA)
-      .setThumbnail(interaction.client.user.displayAvatarURL())
-      .setFooter({
-        text: 'Toolmetry AI Support System',
-        iconURL: interaction.client.user.displayAvatarURL()
-      })
-      .setTimestamp();
-
-    const supportEmail = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
-
-    const row = new ActionRowBuilder()
-      .addComponents(
-        new ButtonBuilder()
-          .setCustomId('ticket_create')
-          .setLabel('Create Ticket')
-          .setStyle(ButtonStyle.Primary)
-          .setEmoji('🎫'),
-        new ButtonBuilder()
-          .setURL(`mailto:${supportEmail}`)
-          .setLabel('Email Support')
-          .setStyle(ButtonStyle.Link)
-          .setEmoji('📧')
-      );
-
     try {
+      const targetChannel = interaction.options.getChannel('channel') || interaction.channel;
+
+      if (!targetChannel) {
+        return await interaction.reply({ content: 'Could not find a valid channel.', ephemeral: true });
+      }
+
+      const avatarURL = interaction.client.user.displayAvatarURL({ size: 256 });
+
+      const embed = new EmbedBuilder()
+        .setTitle('Support Center')
+        .setDescription(
+          '**Need help? We are here for you!**\n\n' +
+          'Click the button below to create a support ticket.\n\n' +
+          '**Fast response times**\n' +
+          '**Professional support**\n' +
+          '**AI-powered assistance**'
+        )
+        .setColor(0x00D4AA)
+        .setThumbnail(avatarURL)
+        .setFooter({ text: 'Toolmetry AI Support System', iconURL: avatarURL })
+        .setTimestamp();
+
+      const supportEmail = process.env.SUPPORT_EMAIL || 'toolmetryai@gmail.com';
+
+      const createButton = new ButtonBuilder()
+        .setCustomId('ticket_create')
+        .setLabel('Create Ticket')
+        .setStyle(ButtonStyle.Primary);
+
+      const emailButton = new ButtonBuilder()
+        .setURL(`mailto:${supportEmail}`)
+        .setLabel('Email Support')
+        .setStyle(ButtonStyle.Link);
+
+      const row = new ActionRowBuilder().addComponents(createButton, emailButton);
+
       await targetChannel.send({ embeds: [embed], components: [row] });
-      await interaction.reply({ content: `Ticket panel sent to ${targetChannel}`, ephemeral: true });
+
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: `Ticket panel sent to ${targetChannel}`, ephemeral: true });
+      } else {
+        await interaction.reply({ content: `Ticket panel sent to ${targetChannel}`, ephemeral: true });
+      }
     } catch (err) {
-      console.error('[Ticket-Panel] Error:', err.message);
-      await interaction.reply({ content: `Failed to send panel to ${targetChannel}. Check bot permissions.`, ephemeral: true });
+      console.error('ticket-panel error:', err);
+      try {
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp({ content: `Failed to send panel: ${err.message}`, ephemeral: true });
+        } else {
+          await interaction.reply({ content: `Failed to send panel: ${err.message}`, ephemeral: true });
+        }
+      } catch (replyErr) {
+        console.error('ticket-panel reply error:', replyErr.message);
+      }
     }
   }
 };

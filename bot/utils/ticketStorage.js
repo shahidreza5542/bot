@@ -28,7 +28,7 @@ function loadTickets() {
       return true;
     }
   } catch (err) {
-    console.error('[TicketStorage] Load error:', err.message);
+    console.error('TicketStorage load error:', err.message);
   }
   return false;
 }
@@ -39,7 +39,7 @@ function saveTickets() {
     fs.writeFileSync(TICKETS_FILE, JSON.stringify({ tickets: obj, lastUpdated: new Date().toISOString() }, null, 2));
     return true;
   } catch (err) {
-    console.error('[TicketStorage] Save error:', err.message);
+    console.error('TicketStorage save error:', err.message);
     return false;
   }
 }

@@ -9,18 +9,22 @@ module.exports = (client) => {
   }
 
   const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+  let loaded = 0;
 
   for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-
-    if ('data' in command && 'execute' in command) {
-      client.commands.set(command.data.name, command);
-      console.log(`Loaded command: /${command.data.name}`);
-    } else {
-      console.log(`[WARNING] ${file} is missing required properties.`);
+    try {
+      const command = require(path.join(commandsPath, file));
+      if ('data' in command && 'execute' in command) {
+        client.commands.set(command.data.name, command);
+        console.log(`Command: /${command.data.name}`);
+        loaded++;
+      } else {
+        console.log(`Skip: ${file}`);
+      }
+    } catch (err) {
+      console.error(`Error loading ${file}:`, err.message);
     }
   }
 
-  console.log(`\nLoaded ${commandFiles.length} commands into memory`);
+  console.log(`Loaded ${loaded} commands`);
 };
